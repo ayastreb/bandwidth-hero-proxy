@@ -1,41 +1,36 @@
-# Bandwidth Hero Server
+# Bandwidth Hero Compression Proxy
 
-This simple proxy server is written in Node.js
+This proxy server compress given image to greyscale [WebP](https://developers.google.com/speed/webp/) image.
 
-It uses Express as a server and Sharp for images compression.
-
-You can run your own instance if you like to.
+It uses [Request](https://github.com/request/request) to pipe original image
+through [Sharp](https://github.com/lovell/sharp).
 
 ## Deployment
 
-* Clone Bandwidth Hero repository:
+# Heroku
+You can deploy this proxy server to Heroku:
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+# Webtask
+You can also use [webtask.io](https://webtask.io/) to run the server:
+
+* Clone the repository:
 
   ```
-  git clone https://github.com/ayastreb/bandwidth-hero.git ./bandwidth-hero
-  ```
-  
-* Go to checked out directory:
-
-  ```
-  cd bandwidth-hero
+  git clone https://github.com/ayastreb/bandwidth-hero-proxy.git
   ```
 
-* Download [Heroku toolbelt](https://toolbelt.heroku.com): 
+* Install [Webtask CLI](https://webtask.io/cli):
 
-* Login to your Heroku account:
-  
   ```
-  heroku login
+  npm install wt-cli -g
+
+  wt init __your_email__
   ```
-  
-* Create new Heroku app:
-  
+
+* Create new webtask:
+
   ```
-  heroku create
-  ```
-  
-* Deploy server sub folder to Heroku app:
-  
-  ```
-  git subtree push --prefix server heroku master
+  wt create server.js --meta wt-compiler=webtask-tools/express
   ```
