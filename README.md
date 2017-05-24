@@ -1,6 +1,7 @@
 # Bandwidth Hero Compression Proxy
 
-This proxy server compress given image to greyscale [WebP](https://developers.google.com/speed/webp/) image.
+This proxy server is used by [Bandwidth Hero](https://github.com/ayastreb/bandwidth-hero) Chrome extension.
+It compresses given image to greyscale [WebP](https://developers.google.com/speed/webp/) image.
 
 It uses [Request](https://github.com/request/request) to pipe original image
 through [Sharp](https://github.com/lovell/sharp).
