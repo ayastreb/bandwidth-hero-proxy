@@ -11,7 +11,7 @@ through [Sharp](https://github.com/lovell/sharp).
 # Heroku
 You can deploy this proxy server to Heroku:
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ayastreb/bandwidth-hero-proxy)
 
 # Webtask
 You can also use [webtask.io](https://webtask.io/) to run the server:
