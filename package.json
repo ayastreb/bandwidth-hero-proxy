@@ -1,0 +1,20 @@
+{
+  "name": "bandwidth-hero-proxy",
+  "main": "server.js",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A proxy server that compresses images to WebP, used by Bandwidth Hero Chrome extension.",
+  "author": "Anatoliy Yastreb",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "4.14.0",
+    "request": "^2.81.0",
+    "sharp": "^0.17.3"
+  },
+  "engines": {
+    "node": "6.3.1"
+  }
+}
