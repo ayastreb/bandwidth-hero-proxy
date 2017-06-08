@@ -20,14 +20,14 @@ app.get('/', (req, res) => {
   let originalSize = 0
   const transformer = sharp().grayscale().toFormat('webp', { quality: QUALITY })
   transformer.on('error', err => console.log(`Error in ${imageUrl}: ${err}`))
-  transformer.on('data', processedImage => {
+  transformer.on('info', info => {
     let headers = {
       'Content-Type': 'image/webp',
-      'Content-Length': processedImage.length
+      'Content-Length': info.size
     }
     if (originalSize > 0) {
       headers['X-Original-Size'] = originalSize
-      headers['X-Bytes-Saved'] = originalSize - processedImage.length
+      headers['X-Bytes-Saved'] = originalSize - info.size
     }
     res.writeHead(200, headers)
   })
