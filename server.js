@@ -15,14 +15,17 @@ if (PORT > 0) {
 
 app.get('/', (req, res) => {
   const imageUrl = req.query.url
+  const jpegOnly = !!req.query.jpeg
   if (!imageUrl.match(/^https?:/i)) return res.status(400).end()
 
   let originalSize = 0
-  const transformer = sharp().grayscale().toFormat('webp', { quality: QUALITY })
+  const transformer = sharp()
+    .grayscale()
+    .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality: QUALITY })
   transformer.on('error', err => console.log(`Error in ${imageUrl}: ${err}`))
   transformer.on('info', info => {
     let headers = {
-      'Content-Type': 'image/webp',
+      'Content-Type': jpegOnly ? 'image/jpeg' : 'image/webp',
       'Content-Length': info.size
     }
     if (originalSize > 0) {
