@@ -4,7 +4,7 @@ const request = require('request')
 const sharp = require('sharp')
 
 const PORT = process.env.PORT
-const QUALITY = 40
+const DEFAULT_QUALITY = 40
 
 process.on('uncaughtException', err => console.log(`process error: ${err}`))
 
@@ -16,12 +16,14 @@ if (PORT > 0) {
 app.get('/', (req, res) => {
   const imageUrl = req.query.url
   const jpegOnly = !!req.query.jpeg
+  const isGrayscale = req.query.bw != 0
+  const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
   if (!imageUrl.match(/^https?:/i)) return res.status(400).end()
 
   let originalSize = 0
   const transformer = sharp()
-    .grayscale()
-    .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality: QUALITY })
+    .grayscale(isGrayscale)
+    .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality })
   transformer.on('error', err => console.log(`Error in ${imageUrl}: ${err}`))
   transformer.on('info', info => {
     let headers = {
