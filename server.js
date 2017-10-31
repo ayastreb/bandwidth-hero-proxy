@@ -5,6 +5,8 @@ const sharp = require('sharp')
 
 const PORT = process.env.PORT
 const DEFAULT_QUALITY = 40
+const USER_AGENT =
+  'Bandwidth-Hero Compressor (https://github.com/ayastreb/bandwidth-hero-proxy)'
 
 process.on('uncaughtException', err => console.log(`process error: ${err}`))
 
@@ -38,7 +40,14 @@ app.get('/', (req, res) => {
   })
 
   request
-    .get(imageUrl)
+    .get({
+      url: imageUrl,
+      headers: {
+        'User-Agent': USER_AGENT,
+        Cookie: req.headers.cookie,
+        'X-Forwarded-For': req.ip
+      }
+    })
     .on('response', res => (originalSize = res.headers['content-length']))
     .pipe(transformer)
     .pipe(res)
