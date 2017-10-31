@@ -6,7 +6,7 @@ It compresses given image to greyscale [WebP](https://developers.google.com/spee
 It uses [Request](https://github.com/request/request) to pipe original image
 through [Sharp](https://github.com/lovell/sharp).
 
-This is *NOT* an anonymizing proxy &mdash; it downloads images on user's behalf,
+This is **NOT** an anonymizing proxy &mdash; it downloads images on user's behalf,
 passing cookies and user's IP address through to the origin host.
 
 ## Deployment
