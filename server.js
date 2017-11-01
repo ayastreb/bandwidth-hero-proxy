@@ -4,7 +4,7 @@ const express = require('express')
 const request = require('request')
 const sharp = require('sharp')
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 9000
 const DEFAULT_QUALITY = 40
 const USER_AGENT =
   'Bandwidth-Hero Compressor (https://github.com/ayastreb/bandwidth-hero-proxy)'
