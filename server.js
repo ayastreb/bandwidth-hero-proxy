@@ -17,6 +17,12 @@ if (PORT > 0) {
 
 app.get('/', (req, res) => {
   const imageUrl = req.query.url
+  if (!imageUrl) {
+    res.write(
+      'Bandwidth Hero - https://github.com/ayastreb/bandwidth-hero-proxy'
+    )
+    return res.end()
+  }
   const jpegOnly = !!req.query.jpeg
   const isGrayscale = req.query.bw != 0
   const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
