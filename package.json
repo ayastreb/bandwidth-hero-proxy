@@ -3,18 +3,19 @@
   "main": "server.js",
   "private": true,
   "version": "1.0.1",
-  "description": "A proxy server that compresses images to WebP, used by Bandwidth Hero Chrome extension.",
+  "description":
+    "A proxy server that compresses images to WebP, used by Bandwidth Hero Chrome extension.",
   "author": "Anatoliy Yastreb",
   "license": "MIT",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "4.14.0",
+    "express": "4.16.2",
     "newrelic": "^2.3.1",
     "raven": "^2.2.1",
-    "request": "^2.81.0",
-    "sharp": "^0.17.3"
+    "request": "^2.83.0",
+    "sharp": "^0.18.4"
   },
   "engines": {
     "node": "8.9.0"
