@@ -45,10 +45,7 @@ app.get('/', (req, res) => {
         },
         proxied => {
           const originSize = proxied.headers['content-length']
-          if (
-            proxied.statusCode !== 200 ||
-            !proxied.headers['content-type'].startsWith('image')
-          ) {
+          if (proxied.statusCode !== 200) {
             res.writeHead(400)
             return res.end()
           }
