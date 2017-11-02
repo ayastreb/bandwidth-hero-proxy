@@ -1,5 +1,5 @@
 'use strict'
-equire('newrelic')
+require('newrelic')
 const express = require('express')
 const Raven = require('raven')
 const sharp = require('sharp')
