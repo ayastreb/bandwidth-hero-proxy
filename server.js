@@ -24,39 +24,43 @@ app.get('/', (req, res) => {
   const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
   if (!imageUrl.match(/^https?:/i)) return res.status(400).end()
 
-  let originalHeaders = {}
-  const transformer = sharp()
-    .grayscale(isGrayscale)
-    .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality })
-  transformer.on('error', err => Raven.captureException)
-  transformer.on('info', info => {
-    let headers = Object.assign({}, originalHeaders, {
-      'Content-Type': jpegOnly ? 'image/jpeg' : 'image/webp',
-      'Content-Length': info.size
-    })
+  try {
+    let originalHeaders = {}
+    const transformer = sharp()
+      .grayscale(isGrayscale)
+      .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality })
+    transformer.on('error', err => Raven.captureException)
+    transformer.on('info', info => {
+      let headers = Object.assign({}, originalHeaders, {
+        'Content-Type': jpegOnly ? 'image/jpeg' : 'image/webp',
+        'Content-Length': info.size
+      })
 
-    if (originalHeaders['content-length'] > 0) {
-      headers['X-Original-Size'] = originalHeaders['content-length']
-      headers['X-Bytes-Saved'] = originalHeaders['content-length'] - info.size
-    }
-    res.writeHead(200, headers)
-  })
-
-  request
-    .get({
-      url: imageUrl,
-      headers: {
-        'User-Agent': USER_AGENT,
-        Cookie: req.headers.cookie,
-        'X-Forwarded-For': req.ip
+      if (originalHeaders['content-length'] > 0) {
+        headers['X-Original-Size'] = originalHeaders['content-length']
+        headers['X-Bytes-Saved'] = originalHeaders['content-length'] - info.size
       }
+      res.writeHead(200, headers)
     })
-    .on('error', () => res.status(400).end())
-    .on('response', res => {
-      originalHeaders = res.headers
-    })
-    .pipe(transformer)
-    .pipe(res)
+
+    request
+      .get({
+        url: imageUrl,
+        headers: {
+          'User-Agent': USER_AGENT,
+          Cookie: req.headers.cookie,
+          'X-Forwarded-For': req.ip
+        }
+      })
+      .on('error', () => res.status(400).end())
+      .on('response', res => {
+        originalHeaders = res.headers
+      })
+      .pipe(transformer)
+      .pipe(res)
+  } catch (e) {
+    Raven.captureException(e)
+  }
 })
 
 app.use(Raven.errorHandler())
