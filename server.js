@@ -7,20 +7,16 @@ const sharp = require('sharp')
 
 const PORT = process.env.PORT
 const DEFAULT_QUALITY = 40
-const USER_AGENT =
-  'Bandwidth-Hero Compressor (https://github.com/ayastreb/bandwidth-hero-proxy)'
+const USER_AGENT = 'Bandwidth-Hero Compressor'
 
 Raven.config(process.env.SENTRY_DSN).install()
 
 const app = express()
 app.use(Raven.requestHandler())
-
 app.get('/', (req, res) => {
   const imageUrl = req.query.url
   if (!imageUrl) {
-    res.write(
-      'Bandwidth Hero - https://github.com/ayastreb/bandwidth-hero-proxy'
-    )
+    res.write('https://github.com/ayastreb/bandwidth-hero-proxy')
     return res.end()
   }
   const jpegOnly = !!req.query.jpeg
@@ -32,7 +28,7 @@ app.get('/', (req, res) => {
   const transformer = sharp()
     .grayscale(isGrayscale)
     .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality })
-  transformer.on('error', err => console.log(`Error in ${imageUrl}: ${err}`))
+  transformer.on('error', err => Raven.captureException)
   transformer.on('info', info => {
     let headers = {
       'Content-Type': jpegOnly ? 'image/jpeg' : 'image/webp',
@@ -45,30 +41,22 @@ app.get('/', (req, res) => {
     res.writeHead(200, headers)
   })
 
-  try {
-    request
-      .get({
-        url: imageUrl,
-        headers: {
-          'User-Agent': USER_AGENT,
-          Cookie: req.headers.cookie,
-          'X-Forwarded-For': req.ip
-        }
-      })
-      .on('error', err => {
-        console.log(`Could not get ${imageUrl}`)
-        return res.status(400).end()
-      })
-      .on('response', res => (originalSize = res.headers['content-length']))
-      .pipe(transformer)
-      .pipe(res)
-  } catch (e) {
-    Raven.captureException(e)
-  }
+  request
+    .get({
+      url: imageUrl,
+      headers: {
+        'User-Agent': USER_AGENT,
+        Cookie: req.headers.cookie,
+        'X-Forwarded-For': req.ip
+      }
+    })
+    .on('error', () => res.status(400).end())
+    .on('response', res => (originalSize = res.headers['content-length']))
+    .pipe(transformer)
+    .pipe(res)
 })
 
 app.use(Raven.errorHandler())
-
 app.listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 module.exports = app
