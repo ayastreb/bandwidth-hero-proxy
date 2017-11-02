@@ -16,11 +16,13 @@ Raven.config(process.env.SENTRY_DSN).install()
 const app = express()
 app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
-  const imageUrl = url.parse(req.query.url)
-  if (!imageUrl) {
+  const queryUrl = req.query.url
+  if (!queryUrl) {
     res.write('https://github.com/ayastreb/bandwidth-hero-proxy')
     return res.end()
   }
+  const imageUrl = url.parse(queryUrl)
+
   const jpegOnly = !!req.query.jpeg
   const isGrayscale = req.query.bw != 0
   const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
