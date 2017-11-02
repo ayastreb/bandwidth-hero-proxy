@@ -39,7 +39,7 @@ app.get('/', (req, res) => {
           path: imageUrl.path,
           headers: {
             'User-Agent': USER_AGENT,
-            Cookie: req.headers.cookie,
+            Cookie: req.headers.cookie || '',
             'X-Forwarded-For': req.ip
           }
         },
