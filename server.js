@@ -24,19 +24,20 @@ app.get('/', (req, res) => {
   const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
   if (!imageUrl.match(/^https?:/i)) return res.status(400).end()
 
-  let originalSize = 0
+  let originalHeaders = {}
   const transformer = sharp()
     .grayscale(isGrayscale)
     .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality })
   transformer.on('error', err => Raven.captureException)
   transformer.on('info', info => {
-    let headers = {
+    let headers = Object.assign({}, originalHeaders, {
       'Content-Type': jpegOnly ? 'image/jpeg' : 'image/webp',
       'Content-Length': info.size
-    }
-    if (originalSize > 0) {
-      headers['X-Original-Size'] = originalSize
-      headers['X-Bytes-Saved'] = originalSize - info.size
+    })
+
+    if (originalHeaders['content-length'] > 0) {
+      headers['X-Original-Size'] = originalHeaders['content-length']
+      headers['X-Bytes-Saved'] = originalHeaders['content-length'] - info.size
     }
     res.writeHead(200, headers)
   })
@@ -51,7 +52,9 @@ app.get('/', (req, res) => {
       }
     })
     .on('error', () => res.status(400).end())
-    .on('response', res => (originalSize = res.headers['content-length']))
+    .on('response', res => {
+      originalHeaders = res.headers
+    })
     .pipe(transformer)
     .pipe(res)
 })
