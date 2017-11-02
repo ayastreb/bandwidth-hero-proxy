@@ -55,6 +55,10 @@ app.get('/', (req, res) => {
           'X-Forwarded-For': req.ip
         }
       })
+      .on('error', err => {
+        console.log(`Could not get ${imageUrl}`)
+        return res.status(400).end()
+      })
       .on('response', res => (originalSize = res.headers['content-length']))
       .pipe(transformer)
       .pipe(res)
