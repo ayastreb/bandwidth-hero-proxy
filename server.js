@@ -1,20 +1,19 @@
 'use strict'
 require('newrelic')
 const express = require('express')
+const Raven = require('raven')
 const request = require('request')
 const sharp = require('sharp')
 
-const PORT = process.env.PORT || 9000
+const PORT = process.env.PORT
 const DEFAULT_QUALITY = 40
 const USER_AGENT =
   'Bandwidth-Hero Compressor (https://github.com/ayastreb/bandwidth-hero-proxy)'
 
-process.on('uncaughtException', err => console.log(`process error: ${err}`))
+Raven.config(process.env.SENTRY_DSN).install()
 
 const app = express()
-if (PORT > 0) {
-  app.listen(PORT, () => console.log(`Listening on ${PORT}`))
-}
+app.use(Raven.requestHandler())
 
 app.get('/', (req, res) => {
   const imageUrl = req.query.url
@@ -46,18 +45,26 @@ app.get('/', (req, res) => {
     res.writeHead(200, headers)
   })
 
-  request
-    .get({
-      url: imageUrl,
-      headers: {
-        'User-Agent': USER_AGENT,
-        Cookie: req.headers.cookie,
-        'X-Forwarded-For': req.ip
-      }
-    })
-    .on('response', res => (originalSize = res.headers['content-length']))
-    .pipe(transformer)
-    .pipe(res)
+  try {
+    request
+      .get({
+        url: imageUrl,
+        headers: {
+          'User-Agent': USER_AGENT,
+          Cookie: req.headers.cookie,
+          'X-Forwarded-For': req.ip
+        }
+      })
+      .on('response', res => (originalSize = res.headers['content-length']))
+      .pipe(transformer)
+      .pipe(res)
+  } catch (e) {
+    Raven.captureException(e)
+  }
 })
+
+app.use(Raven.errorHandler())
+
+app.listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 module.exports = app
