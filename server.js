@@ -80,6 +80,7 @@ app.get('/', (req, res) => {
     transformer.on('error', terminate)
     transformer.on('info', info => {
       if (!info) return
+      if (res.headersSent) return
 
       for (const header in origin.headers) {
         res.setHeader(header, origin.headers[header])
