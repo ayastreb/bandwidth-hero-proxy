@@ -3,8 +3,7 @@
 This proxy server is used by [Bandwidth Hero](https://github.com/ayastreb/bandwidth-hero) Chrome extension.
 It compresses given image to greyscale [WebP](https://developers.google.com/speed/webp/) image.
 
-It uses [Request](https://github.com/request/request) to pipe original image
-through [Sharp](https://github.com/lovell/sharp).
+It downloads original image and transforms it with [Sharp](https://github.com/lovell/sharp) on the fly without saving images on disk.
 
 This is **NOT** an anonymizing proxy &mdash; it downloads images on user's behalf,
 passing cookies and user's IP address through to the origin host.
