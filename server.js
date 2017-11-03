@@ -1,8 +1,8 @@
 'use strict'
 require('newrelic')
-const express = require('express')
+const Express = require('express')
 const Raven = require('raven')
-const sharp = require('sharp')
+const Sharp = require('sharp')
 const http = require('http')
 const https = require('https')
 const url = require('url')
@@ -13,10 +13,11 @@ const USER_AGENT = 'Bandwidth-Hero Compressor'
 
 Raven.config(process.env.SENTRY_DSN).install()
 
-const app = express()
+const app = Express()
 app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
-  const queryUrl = req.query.url
+  let queryUrl = req.query.url
+  if (Array.isArray(queryUrl)) queryUrl = queryUrl.join('&url=')
   if (!queryUrl) {
     res.write('https://github.com/ayastreb/bandwidth-hero-proxy')
     return res.end()
@@ -31,56 +32,55 @@ app.get('/', (req, res) => {
     return res.status(400).end()
   }
 
-  try {
-    const protocol = imageUrl.protocol === 'https:' ? https : http
-    protocol
-      .get(
-        {
-          protocol: imageUrl.protocol,
-          host: imageUrl.host,
-          path: imageUrl.path,
-          headers: {
-            'User-Agent': USER_AGENT,
-            Cookie: req.headers.cookie || '',
-            'X-Forwarded-For': req.ip
-          }
-        },
-        proxied => {
-          const originSize = proxied.headers['content-length']
-          if (proxied.statusCode !== 200) {
-            res.writeHead(400)
-            return res.end()
-          }
+  const protocol = imageUrl.protocol === 'https:' ? https : http
+  protocol
+    .get(
+      {
+        protocol: imageUrl.protocol,
+        host: imageUrl.host,
+        path: imageUrl.path,
+        headers: {
+          Cookie: req.headers.cookie || '',
+          'User-Agent': USER_AGENT,
+          'X-Forwarded-For': req.ip
+        }
+      },
+      proxied => {
+        const originSize = proxied.headers['content-length']
+        if (proxied.statusCode !== 200) {
+          res.writeHead(proxied.statusCode)
+          return res.end()
+        }
+        if (originSize < 1024) {
+          return proxied.pipe(res).on('error', () => res.status(400).end())
+        }
 
-          if (originSize < 1000) {
-            res.writeHead(proxied.statusCode, proxied.headers)
-            return proxied.pipe(res)
-          }
+        const transformer = Sharp()
+          .grayscale(isGrayscale)
+          .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality })
+        transformer.on('error', () => res.status(400).end())
+        transformer.on('info', info => {
+          if (!info) return
 
-          const transformer = sharp()
-            .grayscale(isGrayscale)
-            .toFormat(jpegOnly ? 'jpeg' : 'webp', { quality })
-          transformer.on('error', () => res.status(400).end())
-          transformer.on('info', info => {
-            let responseHeaders = Object.assign({}, proxied.headers, {
-              'Content-Type': jpegOnly ? 'image/jpeg' : 'image/webp',
-              'Content-Length': info.size
-            })
-
-            if (proxied.headers['content-length'] > 0) {
-              responseHeaders['X-Original-Size'] = originSize
-              responseHeaders['X-Bytes-Saved'] = originSize - info.size
-            }
-            res.writeHead(200, responseHeaders)
+          let responseHeaders = Object.assign({}, proxied.headers, {
+            'Content-Type': jpegOnly ? 'image/jpeg' : 'image/webp',
+            'Content-Length': info.size
           })
 
-          proxied.pipe(transformer).pipe(res)
-        }
-      )
-      .on('error', err => res.status(400).end())
-  } catch (e) {
-    Raven.captureException(e)
-  }
+          if (proxied.headers['content-length'] > 0) {
+            responseHeaders['X-Original-Size'] = originSize
+            responseHeaders['X-Bytes-Saved'] = originSize - info.size
+          }
+          res.writeHead(200, responseHeaders)
+        })
+
+        proxied
+          .pipe(transformer)
+          .pipe(res)
+          .on('error', () => res.status(400).end())
+      }
+    )
+    .on('error', err => res.status(400).end())
 })
 
 app.use(Raven.errorHandler())
