@@ -11,7 +11,7 @@ const zlib = require('zlib')
 
 const PORT = process.env.PORT
 const DEFAULT_QUALITY = 40
-const DEFAULT_TIMEOUT = 3000
+const DEFAULT_TIMEOUT = 5000
 const MIN_COMPRESS_LENGTH = 512
 const USER_AGENT = 'Bandwidth-Hero Compressor'
 
@@ -40,8 +40,8 @@ app.get('/', (req, res) => {
     },
     proxied => {
       proxied
-        .pipe(decodeTransformer(req, proxied.headers['content-encoding']))
-        .pipe(imageTransformer(req, res, proxied))
+        .pipe(decodeTransformer(proxied.headers['content-encoding']))
+        .pipe(imageTransformer(proxied))
         .pipe(res)
         .on('error', terminate)
     }
@@ -53,50 +53,50 @@ app.get('/', (req, res) => {
   function terminate() {
     return res.status(400).end()
   }
-})
 
-function decodeTransformer(req, encoding) {
-  switch (encoding) {
-    case 'gzip':
-      return zlib.createGunzip()
-    case 'deflate':
-      return zlib.createDeflate()
-    default:
-      return new PassThrough()
+  function decodeTransformer(encoding) {
+    switch (encoding) {
+      case 'gzip':
+        return zlib.createGunzip()
+      case 'deflate':
+        return zlib.createDeflate()
+      default:
+        return new PassThrough()
+    }
   }
-}
 
-function imageTransformer(req, res, origin) {
-  const originSize = origin.headers['content-length']
-  if (origin.statusCode !== 200 || originSize < MIN_COMPRESS_LENGTH) return new PassThrough()
+  function imageTransformer(origin) {
+    const originSize = origin.headers['content-length']
+    if (origin.statusCode !== 200 || originSize < MIN_COMPRESS_LENGTH) return new PassThrough()
 
-  const format = !!req.query.jpeg ? 'jpeg' : 'webp'
-  const isGrayscale = req.query.bw != 0
-  const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
+    const format = !!req.query.jpeg ? 'jpeg' : 'webp'
+    const isGrayscale = req.query.bw != 0
+    const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
 
-  const transformer = Sharp()
-    .grayscale(isGrayscale)
-    .toFormat(format, { quality })
+    const transformer = Sharp()
+      .grayscale(isGrayscale)
+      .toFormat(format, { quality })
 
-  transformer.on('error', () => res.status(400).end())
-  transformer.on('info', info => {
-    if (!info) return
+    transformer.on('error', terminate)
+    transformer.on('info', info => {
+      if (!info) return
 
-    let headers = Object.assign({}, origin.headers, {
-      'Content-Type': `image/${format}`,
-      'Content-Length': info.size,
-      'Content-Encoding': 'identity'
+      for (const header in origin.headers) {
+        res.setHeader(header, origin.headers[header])
+      }
+      res.setHeader('Content-Type', `image/${format}`)
+      res.setHeader('Content-Length', info.size)
+      res.setHeader('Content-Encoding', 'identity')
+
+      if (originSize > 0) {
+        res.setHeader('X-Original-Size', originSize)
+        res.setHeader('X-Bytes-Saved', originSize - info.size)
+      }
     })
 
-    if (originSize > 0) {
-      headers['X-Original-Size'] = originSize
-      headers['X-Bytes-Saved'] = originSize - info.size
-    }
-    res.writeHead(200, headers)
-  })
-
-  return transformer
-}
+    return transformer
+  }
+})
 
 app.use(Raven.errorHandler())
 if (PORT > 0) app.listen(PORT, () => console.log(`Listening on ${PORT}`))
