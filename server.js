@@ -37,11 +37,7 @@ app.get('/', (req, res) => {
       protocol: imageUrl.protocol,
       host: imageUrl.host,
       path: imageUrl.path,
-      headers: {
-        Cookie: req.headers.cookie || '',
-        'User-Agent': USER_AGENT,
-        'X-Forwarded-For': req.ip
-      }
+      headers: proxyHeaders()
     },
     proxied => {
       proxied
@@ -57,6 +53,20 @@ app.get('/', (req, res) => {
 
   function terminate() {
     return res.status(400).end()
+  }
+
+  function proxyHeaders() {
+    const headers = {
+      'User-Agent': USER_AGENT
+    }
+
+    headers['X-Forwarded-For'] = req.headers['X-Forwarded-For']
+      ? `${req.ip}, ${req.headers['X-Forwarded-For']}`
+      : req.ip
+
+    if (req.headers.cookie) headers['Cookie'] = req.headers.cookie
+
+    return headers
   }
 
   function decodeTransformer(encoding) {
@@ -84,8 +94,7 @@ app.get('/', (req, res) => {
 
     transformer.on('error', terminate)
     transformer.on('info', info => {
-      if (!info) return
-      if (res.headersSent) return
+      if (!info || res.headersSent) return
 
       for (const header in origin.headers) {
         res.setHeader(header, origin.headers[header])
