@@ -1,4 +1,6 @@
 # Bandwidth Hero Compression Proxy
+[![NSP Status](https://nodesecurity.io/orgs/bandwidth-hero/projects/1f035cf0-00f2-43db-9bc0-8e39adb24642/badge)](https://nodesecurity.io/orgs/bandwidth-hero/projects/1f035cf0-00f2-43db-9bc0-8e39adb24642)
+
 
 This proxy server is used by [Bandwidth Hero](https://github.com/ayastreb/bandwidth-hero) Chrome extension.
 It compresses given image to greyscale [WebP](https://developers.google.com/speed/webp/) image.
