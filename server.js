@@ -1,9 +1,4 @@
 'use strict'
-const opbeat = require('opbeat').start({
-  appId: process.env.OPBEAT_APP_ID,
-  organizationId: process.env.OPBEAT_ORG_ID,
-  secretToken: process.env.OPBEAT_TOKEN
-})
 const Express = require('express')
 const Raven = require('raven')
 const Sharp = require('sharp')
@@ -23,7 +18,6 @@ Raven.config(process.env.SENTRY_DSN).install()
 
 const app = Express()
 app.use(Raven.requestHandler())
-app.use(opbeat.middleware.express())
 app.get('/', (req, res) => {
   let queryUrl = req.query.url
   if (Array.isArray(queryUrl)) queryUrl = queryUrl.join('&url=')
