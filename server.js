@@ -97,7 +97,11 @@ app.get('/', (req, res) => {
       if (!info || res.headersSent) return
 
       for (const header in origin.headers) {
-        res.setHeader(header, origin.headers[header])
+        try {
+          res.setHeader(header, origin.headers[header])
+        } catch (e) {
+          console.log(`Could not set header "${header}"`, e)
+        }
       }
       res.setHeader('Content-Type', `image/${format}`)
       res.setHeader('Content-Length', info.size)
