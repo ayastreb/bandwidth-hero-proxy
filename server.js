@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 'use strict'
 const Express = require('express')
 const Raven = require('raven')
