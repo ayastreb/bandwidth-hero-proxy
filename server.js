@@ -27,7 +27,10 @@ app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
   let queryUrl = req.query.url
   if (Array.isArray(queryUrl)) queryUrl = queryUrl.join('&url=')
-  if (!queryUrl) return res.end('https://github.com/ayastreb/bandwidth-hero-proxy')
+  if (!queryUrl) {
+    res.setHeader('Location', 'https://bandwidth-hero.com')
+    return res.status(302).end()
+  }
   const imageUrl = url.parse(queryUrl)
   if (imageUrl.protocol !== 'https:' && imageUrl.protocol !== 'http:') return terminate()
 
