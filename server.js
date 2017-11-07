@@ -57,7 +57,6 @@ app.get('/', (req, res) => {
 
   function terminate(error) {
     Raven.captureException(error)
-    console.log(error.message)
     return res.status(400).end()
   }
 
