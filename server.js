@@ -31,15 +31,16 @@ app.get('/', (req, res) => {
     res.setHeader('Location', 'https://bandwidth-hero.com')
     return res.status(302).end()
   }
-  const imageUrl = url.parse(queryUrl)
-  if (imageUrl.protocol !== 'https:' && imageUrl.protocol !== 'http:') return terminate()
+  const image = url.parse(queryUrl)
+  if (image.protocol !== 'https:' && image.protocol !== 'http:') return terminate()
 
-  const protocol = imageUrl.protocol === 'https:' ? https : http
+  const protocol = image.protocol === 'https:' ? https : http
   const proxyReq = protocol.get(
     {
-      protocol: imageUrl.protocol,
-      host: imageUrl.host,
-      path: imageUrl.path,
+      protocol: image.protocol,
+      hostname: image.hostname,
+      port: image.port,
+      path: image.path,
       headers: proxyHeaders()
     },
     proxied => {
@@ -56,6 +57,7 @@ app.get('/', (req, res) => {
 
   function terminate(error) {
     Raven.captureException(error)
+    console.log(error.message)
     return res.status(400).end()
   }
 
