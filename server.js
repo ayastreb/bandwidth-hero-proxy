@@ -54,7 +54,8 @@ app.get('/', (req, res) => {
   proxyReq.on('error', terminate)
   proxyReq.setTimeout(DEFAULT_TIMEOUT, terminate)
 
-  function terminate() {
+  function terminate(error) {
+    Raven.captureException(error)
     return res.status(400).end()
   }
 
@@ -103,7 +104,7 @@ app.get('/', (req, res) => {
         try {
           res.setHeader(header, origin.headers[header])
         } catch (e) {
-          console.log(`Could not set header "${header}"`, e)
+          Raven.captureException(e)
         }
       }
       res.setHeader('Content-Type', `image/${format}`)
