@@ -44,11 +44,17 @@ app.get('/', (req, res) => {
       headers: proxyHeaders()
     },
     proxied => {
-      proxied
-        .pipe(decodeTransformer(proxied.headers['content-encoding']))
-        .pipe(imageTransformer(proxied))
-        .pipe(res)
-        .on('error', terminate)
+      const contentType = proxied.headers['content-type'] || ''
+      if (proxied.statusCode !== 200 || !contentType.startsWith('image')) {
+        res.setHeader('Location', queryUrl)
+        res.status(302).end()
+      } else {
+        proxied
+          .pipe(decodeTransformer(proxied.headers['content-encoding']))
+          .pipe(imageTransformer(proxied))
+          .pipe(res)
+          .on('error', terminate)
+      }
     }
   )
 
@@ -87,7 +93,7 @@ app.get('/', (req, res) => {
 
   function imageTransformer(origin) {
     const originSize = origin.headers['content-length']
-    if (origin.statusCode !== 200 || originSize < MIN_COMPRESS_LENGTH) return new PassThrough()
+    if (originSize < MIN_COMPRESS_LENGTH) return new PassThrough()
 
     const format = !!req.query.jpeg ? 'jpeg' : 'webp'
     const isGrayscale = req.query.bw != 0
