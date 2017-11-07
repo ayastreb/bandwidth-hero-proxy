@@ -46,7 +46,9 @@ app.get('/', (req, res) => {
     proxied => {
       const contentType = proxied.headers['content-type'] || ''
       if (proxied.statusCode !== 200 || !contentType.startsWith('image')) {
-        if (!res.headersSent) setHeader('Location', queryUrl)
+        if (!res.headersSent) {
+          res.setHeader('Location', queryUrl)
+        }
         res.status(302).end()
       } else {
         proxied
