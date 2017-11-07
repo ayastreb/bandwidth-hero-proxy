@@ -64,7 +64,6 @@ app.get('/', (req, res) => {
   proxyReq.setTimeout(DEFAULT_TIMEOUT, terminate)
 
   function terminate(error) {
-    Raven.captureException(error)
     return res.status(400).end()
   }
 
