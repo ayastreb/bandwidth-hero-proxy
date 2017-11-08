@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 'use strict'
-const opbeat = require('opbeat').start({
-  appId: process.env.OPBEAT_APP_ID,
-  organizationId: process.env.OPBEAT_ORG_ID,
-  secretToken: process.env.OPBEAT_TOKEN
-})
+// const opbeat = require('opbeat').start({
+//   appId: process.env.OPBEAT_APP_ID,
+//   organizationId: process.env.OPBEAT_ORG_ID,
+//   secretToken: process.env.OPBEAT_TOKEN
+// })
 const Express = require('express')
 const Raven = require('raven')
 const Request = require('request')
@@ -84,7 +84,7 @@ app.get('/', (req, res) => {
 })
 
 app.use(Raven.errorHandler())
-app.use(opbeat.middleware.express())
+// app.use(opbeat.middleware.express())
 if (PORT > 0) app.listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 module.exports = app
