@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
         .pipe(res)
     } else if (!res.headersSent) {
       res.setHeader('Location', encodeURI(imageUrl))
-      res.status(301).end()
+      res.status(302).end()
     }
   }).on('error', () => res.status(400).end())
 })
