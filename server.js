@@ -16,7 +16,7 @@ const zlib = require('zlib')
 
 const PORT = process.env.PORT
 const DEFAULT_QUALITY = 40
-const DEFAULT_TIMEOUT = 5000
+const DEFAULT_TIMEOUT = 10000
 const MIN_COMPRESS_LENGTH = 512
 const USER_AGENT = 'Bandwidth-Hero Compressor'
 
