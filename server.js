@@ -7,12 +7,8 @@ const opbeat = require('opbeat').start({
 })
 const Express = require('express')
 const Raven = require('raven')
+const Request = require('request')
 const Sharp = require('sharp')
-const PassThrough = require('stream').PassThrough
-const url = require('url')
-const http = require('http')
-const https = require('https')
-const zlib = require('zlib')
 
 const PORT = process.env.PORT
 const DEFAULT_QUALITY = 40
@@ -25,15 +21,12 @@ Raven.config(process.env.SENTRY_DSN).install()
 const app = Express()
 app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
-  let queryUrl = req.query.url
-  if (Array.isArray(queryUrl)) queryUrl = queryUrl.join('&url=')
-  if (!queryUrl) {
+  let imageUrl = req.query.url
+  if (Array.isArray(imageUrl)) imageUrl = imageUrl.join('&url=')
+  if (!imageUrl) {
     res.setHeader('Location', 'https://bandwidth-hero.com')
     return res.status(302).end()
   }
-  const image = url.parse(queryUrl)
-  if (image.protocol !== 'https:' && image.protocol !== 'http:') return terminate()
-
   const headers = {
     'User-Agent': USER_AGENT
   }
@@ -41,40 +34,26 @@ app.get('/', (req, res) => {
     ? `${req.ip}, ${req.headers['X-Forwarded-For']}`
     : req.ip
   if (req.headers.cookie) headers['Cookie'] = req.headers.cookie
+  if (req.headers.dnt) headers['DNT'] = req.headers.dnt
 
-  const protocol = image.protocol === 'https:' ? https : http
-  const proxyReq = protocol.get(
-    {
-      protocol: image.protocol,
-      hostname: image.hostname,
-      port: image.port,
-      path: image.path,
-      headers: headers
-    },
-    proxied => {
-      const contentType = proxied.headers['content-type'] || ''
-      if (
-        proxied.statusCode !== 200 ||
-        proxied.headers['content-length'] < MIN_COMPRESS_LENGTH ||
-        !contentType.startsWith('image')
-      ) {
-        if (!res.headersSent) res.setHeader('Location', queryUrl)
-        return res.status(302).end()
-      }
-
-      const decodeTransformer =
-        proxied.headers['content-encoding'] === 'gzip' ? zlib.createGunzip() : new PassThrough()
-
+  Request.head(imageUrl, { headers, timeout: DEFAULT_TIMEOUT }, (err, proxied) => {
+    if (err) return res.status(400).end()
+    if (
+      proxied.statusCode === 200 &&
+      proxied.headers['content-length'] > MIN_COMPRESS_LENGTH &&
+      proxied.headers['content-type'] &&
+      proxied.headers['content-type'].startsWith('image')
+    ) {
       const originSize = proxied.headers['content-length']
       const format = !!req.query.jpeg ? 'jpeg' : 'webp'
       const isGrayscale = req.query.bw != 0
       const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
-      const imageTransformer = Sharp()
+      const transformer = Sharp()
         .grayscale(isGrayscale)
         .toFormat(format, { quality })
 
-      imageTransformer.on('error', terminate)
-      imageTransformer.on('info', info => {
+      transformer.on('error', () => res.status(400).end())
+      transformer.on('info', info => {
         if (!info || res.headersSent) return
 
         for (const header in proxied.headers) {
@@ -86,7 +65,6 @@ app.get('/', (req, res) => {
         }
         res.setHeader('Content-Type', `image/${format}`)
         res.setHeader('Content-Length', info.size)
-        res.setHeader('Content-Encoding', 'identity')
 
         if (originSize > 0) {
           res.setHeader('X-Original-Size', originSize)
@@ -94,20 +72,15 @@ app.get('/', (req, res) => {
         }
       })
 
-      return proxied
-        .pipe(decodeTransformer)
-        .pipe(imageTransformer)
+      Request.get(imageUrl, { headers, timeout: DEFAULT_TIMEOUT })
+        .pipe(transformer)
         .pipe(res)
-        .on('error', terminate)
+        .on('error', () => res.status(400).end())
+    } else if (!res.headersSent) {
+      res.setHeader('Location', imageUrl)
+      res.status(301).end()
     }
-  )
-
-  proxyReq.on('error', terminate)
-  proxyReq.setTimeout(DEFAULT_TIMEOUT, terminate)
-
-  function terminate() {
-    return res.status(400).end()
-  }
+  }).on('error', () => res.status(400).end())
 })
 
 app.use(Raven.errorHandler())
