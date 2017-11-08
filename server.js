@@ -34,6 +34,14 @@ app.get('/', (req, res) => {
   const image = url.parse(queryUrl)
   if (image.protocol !== 'https:' && image.protocol !== 'http:') return terminate()
 
+  const headers = {
+    'User-Agent': USER_AGENT
+  }
+  headers['X-Forwarded-For'] = req.headers['X-Forwarded-For']
+    ? `${req.ip}, ${req.headers['X-Forwarded-For']}`
+    : req.ip
+  if (req.headers.cookie) headers['Cookie'] = req.headers.cookie
+
   const protocol = image.protocol === 'https:' ? https : http
   const proxyReq = protocol.get(
     {
@@ -41,7 +49,7 @@ app.get('/', (req, res) => {
       hostname: image.hostname,
       port: image.port,
       path: image.path,
-      headers: proxyHeaders()
+      headers: headers
     },
     proxied => {
       const contentType = proxied.headers['content-type'] || ''
@@ -54,9 +62,41 @@ app.get('/', (req, res) => {
         return res.status(302).end()
       }
 
+      const decodeTransformer =
+        proxied.headers['content-encoding'] === 'gzip' ? zlib.createGunzip() : new PassThrough()
+
+      const originSize = proxied.headers['content-length']
+      const format = !!req.query.jpeg ? 'jpeg' : 'webp'
+      const isGrayscale = req.query.bw != 0
+      const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
+      const imageTransformer = Sharp()
+        .grayscale(isGrayscale)
+        .toFormat(format, { quality })
+
+      imageTransformer.on('error', terminate)
+      imageTransformer.on('info', info => {
+        if (!info || res.headersSent) return
+
+        for (const header in proxied.headers) {
+          try {
+            res.setHeader(header, proxied.headers[header])
+          } catch (e) {
+            console.log(e)
+          }
+        }
+        res.setHeader('Content-Type', `image/${format}`)
+        res.setHeader('Content-Length', info.size)
+        res.setHeader('Content-Encoding', 'identity')
+
+        if (originSize > 0) {
+          res.setHeader('X-Original-Size', originSize)
+          res.setHeader('X-Bytes-Saved', originSize - info.size)
+        }
+      })
+
       return proxied
-        .pipe(decodeTransformer(proxied.headers['content-encoding']))
-        .pipe(imageTransformer(proxied))
+        .pipe(decodeTransformer)
+        .pipe(imageTransformer)
         .pipe(res)
         .on('error', terminate)
     }
@@ -65,68 +105,8 @@ app.get('/', (req, res) => {
   proxyReq.on('error', terminate)
   proxyReq.setTimeout(DEFAULT_TIMEOUT, terminate)
 
-  function terminate(error) {
+  function terminate() {
     return res.status(400).end()
-  }
-
-  function proxyHeaders() {
-    const headers = {
-      'User-Agent': USER_AGENT
-    }
-
-    headers['X-Forwarded-For'] = req.headers['X-Forwarded-For']
-      ? `${req.ip}, ${req.headers['X-Forwarded-For']}`
-      : req.ip
-
-    if (req.headers.cookie) headers['Cookie'] = req.headers.cookie
-
-    return headers
-  }
-
-  function decodeTransformer(encoding) {
-    switch (encoding) {
-      case 'gzip':
-        return zlib.createGunzip()
-      case 'deflate':
-        return zlib.createDeflate()
-      default:
-        return new PassThrough()
-    }
-  }
-
-  function imageTransformer(origin) {
-    const originSize = origin.headers['content-length']
-
-    const format = !!req.query.jpeg ? 'jpeg' : 'webp'
-    const isGrayscale = req.query.bw != 0
-    const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
-
-    const transformer = Sharp()
-      .grayscale(isGrayscale)
-      .toFormat(format, { quality })
-
-    transformer.on('error', terminate)
-    transformer.on('info', info => {
-      if (!info || res.headersSent) return
-
-      for (const header in origin.headers) {
-        try {
-          res.setHeader(header, origin.headers[header])
-        } catch (e) {
-          Raven.captureException(e)
-        }
-      }
-      res.setHeader('Content-Type', `image/${format}`)
-      res.setHeader('Content-Length', info.size)
-      res.setHeader('Content-Encoding', 'identity')
-
-      if (originSize > 0) {
-        res.setHeader('X-Original-Size', originSize)
-        res.setHeader('X-Bytes-Saved', originSize - info.size)
-      }
-    })
-
-    return transformer
   }
 })
 
