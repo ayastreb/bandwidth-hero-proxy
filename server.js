@@ -25,6 +25,7 @@ const USER_AGENT = 'Bandwidth-Hero Compressor'
 
 Raven.config(process.env.SENTRY_DSN).install()
 
+process.setMaxListeners(0)
 const app = Express()
 app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
@@ -67,7 +68,6 @@ app.get('/', (req, res) => {
         proxied.headers['content-type'] &&
         proxied.headers['content-type'].startsWith('image')
       ) {
-        const originSize = proxied.headers['content-length']
         const format = !!req.query.jpeg ? 'jpeg' : 'webp'
 
         Sharp(image)
@@ -80,8 +80,8 @@ app.get('/', (req, res) => {
             copyHeaders(proxied, res)
             res.setHeader('Content-Type', `image/${format}`)
             res.setHeader('Content-Length', info.size)
-            res.setHeader('X-Original-Size', originSize)
-            res.setHeader('X-Bytes-Saved', originSize - info.size)
+            res.setHeader('X-Original-Size', proxied.headers['content-length'])
+            res.setHeader('X-Bytes-Saved', proxied.headers['content-length'] - info.size)
 
             res.write(compressedImage)
             res.status(200).end()
