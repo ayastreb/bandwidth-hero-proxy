@@ -55,15 +55,19 @@ app.get('/', (req, res) => {
   Request.get(
     imageUrl,
     { headers, timeout: DEFAULT_TIMEOUT, encoding: null },
-    (err, response, image) => {
+    (err, proxied, image) => {
+      if (!res.headersSent && (err || proxied.statusCode !== 200)) {
+        imageUrl += imageUrl.indexOf('?') !== -1 ? '&bh-no-compress=1' : '?bh-no-compress=1'
+        res.setHeader('Location', encodeURI(imageUrl))
+        res.status(302).end()
+      }
+
       if (
-        err === null &&
-        response.statusCode === 200 &&
-        response.headers['content-length'] > MIN_COMPRESS_LENGTH &&
-        response.headers['content-type'] &&
-        response.headers['content-type'].startsWith('image')
+        proxied.headers['content-length'] > MIN_COMPRESS_LENGTH &&
+        proxied.headers['content-type'] &&
+        proxied.headers['content-type'].startsWith('image')
       ) {
-        const originSize = response.headers['content-length']
+        const originSize = proxied.headers['content-length']
         const format = !!req.query.jpeg ? 'jpeg' : 'webp'
         const isGrayscale = req.query.bw != 0
         const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
@@ -73,13 +77,7 @@ app.get('/', (req, res) => {
 
         transformer.toBuffer((err, data, info) => {
           if (err || !info || res.headersSent) return res.status(400).end()
-          for (const header in response.headers) {
-            try {
-              res.setHeader(header, response.headers[header])
-            } catch (e) {
-              console.log(e)
-            }
-          }
+          copyHeaders(proxied, res)
           res.setHeader('Content-Type', `image/${format}`)
           res.setHeader('Content-Length', info.size)
           res.setHeader('X-Original-Size', originSize)
@@ -87,14 +85,24 @@ app.get('/', (req, res) => {
           res.write(data)
           res.status(200).end()
         })
-      } else if (!res.headersSent) {
-        imageUrl += imageUrl.indexOf('?') !== -1 ? '&bh-no-compress=1' : '?bh-no-compress=1'
-        res.setHeader('Location', encodeURI(imageUrl))
-        res.status(302).end()
+      } else {
+        copyHeaders(proxied, res)
+        res.write(image)
+        res.status(200).end()
       }
     }
   )
 })
+
+function copyHeaders(from, to) {
+  for (const header in from.headers) {
+    try {
+      to.setHeader(header, from.headers[header])
+    } catch (e) {
+      console.log(e)
+    }
+  }
+}
 
 app.use(Raven.errorHandler())
 if (process.env.OPBEAT_APP_ID) app.use(opbeat.middleware.express())
