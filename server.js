@@ -25,7 +25,6 @@ const USER_AGENT = 'Bandwidth-Hero Compressor'
 
 Raven.config(process.env.SENTRY_DSN).install()
 
-process.setMaxListeners(0)
 const app = Express()
 app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
@@ -55,7 +54,7 @@ app.get('/', (req, res) => {
 
   Request.get(
     imageUrl,
-    { headers, timeout: DEFAULT_TIMEOUT, encoding: null },
+    { headers, timeout: DEFAULT_TIMEOUT, encoding: null, jar: true },
     (err, proxied, image) => {
       if ((err || proxied.statusCode !== 200) && !res.headersSent) {
         const div = imageUrl.indexOf('?') !== -1 ? '&' : '?'
