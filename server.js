@@ -52,49 +52,48 @@ app.get('/', (req, res) => {
   if (req.headers.cookie) headers['Cookie'] = req.headers.cookie
   if (req.headers.dnt) headers['DNT'] = req.headers.dnt
 
-  Request.head(imageUrl, { headers, timeout: DEFAULT_TIMEOUT }, (err, proxied) => {
-    if (err) return res.status(400).end()
-    if (
-      proxied.statusCode === 200 &&
-      proxied.headers['content-length'] > MIN_COMPRESS_LENGTH &&
-      proxied.headers['content-type'] &&
-      proxied.headers['content-type'].startsWith('image')
-    ) {
-      const originSize = proxied.headers['content-length']
-      const format = !!req.query.jpeg ? 'jpeg' : 'webp'
-      const isGrayscale = req.query.bw != 0
-      const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
-      const transformer = Sharp()
-        .grayscale(isGrayscale)
-        .toFormat(format, { quality })
+  Request.get(
+    imageUrl,
+    { headers, timeout: DEFAULT_TIMEOUT, encoding: null },
+    (err, response, image) => {
+      if (
+        err === null &&
+        response.statusCode === 200 &&
+        response.headers['content-length'] > MIN_COMPRESS_LENGTH &&
+        response.headers['content-type'] &&
+        response.headers['content-type'].startsWith('image')
+      ) {
+        const originSize = response.headers['content-length']
+        const format = !!req.query.jpeg ? 'jpeg' : 'webp'
+        const isGrayscale = req.query.bw != 0
+        const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
+        const transformer = Sharp(image)
+          .grayscale(isGrayscale)
+          .toFormat(format, { quality })
 
-      transformer.on('error', () => res.status(400).end())
-      transformer.on('info', info => {
-        if (!info || res.headersSent) return
-
-        for (const header in proxied.headers) {
-          try {
-            res.setHeader(header, proxied.headers[header])
-          } catch (e) {
-            console.log(e)
+        transformer.toBuffer((err, data, info) => {
+          if (err || !info || res.headersSent) return res.status(400).end()
+          for (const header in response.headers) {
+            try {
+              res.setHeader(header, response.headers[header])
+            } catch (e) {
+              console.log(e)
+            }
           }
-        }
-        res.setHeader('Content-Type', `image/${format}`)
-        res.setHeader('Content-Length', info.size)
-        res.setHeader('X-Original-Size', originSize)
-        res.setHeader('X-Bytes-Saved', originSize - info.size)
-      })
-
-      Request.get(imageUrl, { headers, timeout: DEFAULT_TIMEOUT })
-        .on('error', () => res.status(400).end())
-        .pipe(transformer)
-        .pipe(res)
-    } else if (!res.headersSent) {
-      imageUrl += imageUrl.indexOf('?') !== -1 ? '&bh-no-compress=1' : '?bh-no-compress=1'
-      res.setHeader('Location', encodeURI(imageUrl))
-      res.status(302).end()
+          res.setHeader('Content-Type', `image/${format}`)
+          res.setHeader('Content-Length', info.size)
+          res.setHeader('X-Original-Size', originSize)
+          res.setHeader('X-Bytes-Saved', originSize - info.size)
+          res.write(data)
+          res.status(200).end()
+        })
+      } else if (!res.headersSent) {
+        imageUrl += imageUrl.indexOf('?') !== -1 ? '&bh-no-compress=1' : '?bh-no-compress=1'
+        res.setHeader('Location', encodeURI(imageUrl))
+        res.status(302).end()
+      }
     }
-  })
+  )
 })
 
 app.use(Raven.errorHandler())
