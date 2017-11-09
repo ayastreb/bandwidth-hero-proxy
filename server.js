@@ -63,8 +63,7 @@ app.get('/', (req, res) => {
     },
     (err, proxied, image) => {
       if ((err || proxied.statusCode !== 200) && !res.headersSent) {
-        const div = imageUrl.indexOf('?') !== -1 ? '&' : '?'
-        res.setHeader('Location', encodeURI(`${imageUrl}${div}bh-no-compress=1`))
+        res.setHeader('Location', encodeURI(imageUrl))
         return res.status(302).end()
       }
 
