@@ -59,7 +59,7 @@ app.get('/', (req, res) => {
       if (!res.headersSent && (err || proxied.statusCode !== 200)) {
         imageUrl += imageUrl.indexOf('?') !== -1 ? '&bh-no-compress=1' : '?bh-no-compress=1'
         res.setHeader('Location', encodeURI(imageUrl))
-        res.status(302).end()
+        return res.status(302).end()
       }
 
       if (
