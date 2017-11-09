@@ -63,6 +63,7 @@ app.get('/', (req, res) => {
       }
 
       if (
+        proxied.headers &&
         proxied.headers['content-length'] > MIN_COMPRESS_LENGTH &&
         proxied.headers['content-type'] &&
         proxied.headers['content-type'].startsWith('image')
@@ -75,14 +76,14 @@ app.get('/', (req, res) => {
           .grayscale(isGrayscale)
           .toFormat(format, { quality })
 
-        transformer.toBuffer((err, data, info) => {
+        transformer.toBuffer((err, compressedImage, info) => {
           if (err || !info || res.headersSent) return res.status(400).end()
           copyHeaders(proxied, res)
           res.setHeader('Content-Type', `image/${format}`)
           res.setHeader('Content-Length', info.size)
           res.setHeader('X-Original-Size', originSize)
           res.setHeader('X-Bytes-Saved', originSize - info.size)
-          res.write(data)
+          res.write(compressedImage)
           res.status(200).end()
         })
       } else {
