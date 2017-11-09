@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 'use strict'
+if (process.env.OPBEAT_APP_ID) {
+  const opbeat = require('opbeat').start({
+    appId: process.env.OPBEAT_APP_ID,
+    organizationId: process.env.OPBEAT_ORG_ID,
+    secretToken: process.env.OPBEAT_TOKEN
+  })
+}
+
 const auth = require('basic-auth')
 const Express = require('express')
 const Raven = require('raven')
@@ -88,6 +96,7 @@ app.get('/', (req, res) => {
 })
 
 app.use(Raven.errorHandler())
+if (process.env.OPBEAT_APP_ID) app.use(opbeat.middleware.express())
 if (PORT > 0) app.listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 module.exports = app
