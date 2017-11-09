@@ -90,6 +90,7 @@ app.get('/', (req, res) => {
         .pipe(transformer)
         .pipe(res)
     } else if (!res.headersSent) {
+      imageUrl += imageUrl.indexOf('?') !== -1 ? '&bh-no-compress=1' : '?bh-no-compress=1'
       res.setHeader('Location', encodeURI(imageUrl))
       res.status(302).end()
     }
