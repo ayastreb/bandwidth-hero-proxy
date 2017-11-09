@@ -56,36 +56,36 @@ app.get('/', (req, res) => {
     imageUrl,
     { headers, timeout: DEFAULT_TIMEOUT, encoding: null },
     (err, proxied, image) => {
-      if (!res.headersSent && (err || proxied.statusCode !== 200)) {
-        imageUrl += imageUrl.indexOf('?') !== -1 ? '&bh-no-compress=1' : '?bh-no-compress=1'
-        res.setHeader('Location', encodeURI(imageUrl))
+      if ((err || proxied.statusCode !== 200) && !res.headersSent) {
+        const div = imageUrl.indexOf('?') !== -1 ? '&' : '?'
+        res.setHeader('Location', encodeURI(`${imageUrl}${div}bh-no-compress=1`))
         return res.status(302).end()
       }
 
       if (
-        proxied.headers &&
         proxied.headers['content-length'] > MIN_COMPRESS_LENGTH &&
         proxied.headers['content-type'] &&
         proxied.headers['content-type'].startsWith('image')
       ) {
         const originSize = proxied.headers['content-length']
         const format = !!req.query.jpeg ? 'jpeg' : 'webp'
-        const isGrayscale = req.query.bw != 0
-        const quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
-        const transformer = Sharp(image)
-          .grayscale(isGrayscale)
-          .toFormat(format, { quality })
 
-        transformer.toBuffer((err, compressedImage, info) => {
-          if (err || !info || res.headersSent) return res.status(400).end()
-          copyHeaders(proxied, res)
-          res.setHeader('Content-Type', `image/${format}`)
-          res.setHeader('Content-Length', info.size)
-          res.setHeader('X-Original-Size', originSize)
-          res.setHeader('X-Bytes-Saved', originSize - info.size)
-          res.write(compressedImage)
-          res.status(200).end()
-        })
+        Sharp(image)
+          .grayscale(req.query.bw != 0)
+          .toFormat(format, {
+            quality: parseInt(req.query.l, 10) || DEFAULT_QUALITY
+          })
+          .toBuffer((err, compressedImage, info) => {
+            if (err || !info || res.headersSent) return res.status(400).end()
+            copyHeaders(proxied, res)
+            res.setHeader('Content-Type', `image/${format}`)
+            res.setHeader('Content-Length', info.size)
+            res.setHeader('X-Original-Size', originSize)
+            res.setHeader('X-Bytes-Saved', originSize - info.size)
+
+            res.write(compressedImage)
+            res.status(200).end()
+          })
       } else {
         copyHeaders(proxied, res)
         res.write(image)
