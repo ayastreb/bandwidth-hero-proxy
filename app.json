@@ -1,7 +1,18 @@
 {
   "name": "bandwidth-hero-proxy",
-  "description": "A proxy server that compresses images to WebP, used by Bandwidth Hero Chrome extension.",
+  "description":
+    "Data compression service that converts images to low-res WebP or JPEG on the fly. Used in Bandwidth-Hero browser extension.",
   "repository": "https://github.com/ayastreb/bandwidth-hero-proxy",
-  "logo": "https://raw.githubusercontent.com/ayastreb/bandwidth-hero/master/docs/logo.png",
-  "keywords": ["proxy", "compression", "data saving", "webp"]
+  "website": "https://bandwidth-hero.com",
+  "logo": "https://bandwidth-hero.com/favicon-96x96.png",
+  "keywords": ["proxy", "compression", "data saving", "compress image", "webp"],
+  "env": {
+    "LOGIN": {
+      "description": "If you want to password-protect your service, set your login here."
+    },
+    "PASSWORD": {
+      "description": "If you want to password-protect your service, set your password here.",
+      "generator": "secret"
+    }
+  }
 }
