@@ -54,7 +54,13 @@ app.get('/', (req, res) => {
 
   Request.get(
     imageUrl,
-    { headers, timeout: DEFAULT_TIMEOUT, encoding: null, jar: true },
+    {
+      headers,
+      timeout: DEFAULT_TIMEOUT,
+      encoding: null,
+      jar: true,
+      maxRedirects: 5
+    },
     (err, proxied, image) => {
       if ((err || proxied.statusCode !== 200) && !res.headersSent) {
         const div = imageUrl.indexOf('?') !== -1 ? '&' : '?'
