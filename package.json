@@ -4,13 +4,14 @@
   "private": true,
   "version": "1.0.1",
   "description":
-    "A proxy server that compresses images to WebP, used by Bandwidth Hero Chrome extension.",
+    "Data compression service that converts images to low-res WebP or JPEG on the fly. Used in Bandwidth-Hero browser extension.",
   "author": "Anatoliy Yastreb",
   "license": "MIT",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
+    "basic-auth": "^2.0.0",
     "express": "4.16.2",
     "opbeat": "^4.16.0",
     "raven": "^2.2.1",

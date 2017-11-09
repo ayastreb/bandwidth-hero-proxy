@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 'use strict'
+const auth = require('basic-auth')
 const Express = require('express')
 const Raven = require('raven')
 const Request = require('request')
 const Sharp = require('sharp')
 
 const PORT = process.env.PORT
+const LOGIN = process.env.LOGIN
+const PASSWORD = process.env.PASSWORD
 const DEFAULT_QUALITY = 40
 const DEFAULT_TIMEOUT = 10000
 const MIN_COMPRESS_LENGTH = 512
@@ -16,6 +19,15 @@ Raven.config(process.env.SENTRY_DSN).install()
 const app = Express()
 app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
+  if (LOGIN && PASSWORD) {
+    const credentials = auth(req)
+    if (!credentials || credentials.name !== LOGIN || credentials.pass !== PASSWORD) {
+      res.setHeader('WWW-Authenticate', `Basic realm="${USER_AGENT}"`)
+
+      return res.status(401).end('Access denied')
+    }
+  }
+
   let imageUrl = req.query.url
   if (Array.isArray(imageUrl)) imageUrl = imageUrl.join('&url=')
   if (!imageUrl) {
