@@ -14,6 +14,7 @@ const Express = require('express')
 const Raven = require('raven')
 const Request = require('request')
 const Sharp = require('sharp')
+const http = require('http')
 
 const PORT = process.env.PORT
 const LOGIN = process.env.LOGIN
@@ -26,6 +27,10 @@ const USER_AGENT = 'Bandwidth-Hero Compressor'
 Raven.config(process.env.SENTRY_DSN).install()
 
 const app = Express()
+const pool = new http.Agent()
+pool.maxSockets = 100
+pool.maxRedirects = 5
+
 app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
   if (LOGIN && PASSWORD) {
@@ -55,6 +60,7 @@ app.get('/', (req, res) => {
   Request.get(
     imageUrl,
     {
+      pool,
       headers,
       timeout: DEFAULT_TIMEOUT,
       encoding: null,
