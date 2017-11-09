@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
     },
     (err, proxied, image) => {
       if ((err || proxied.statusCode !== 200) && !res.headersSent) {
-        res.setHeader('Location', encodeURI(imageUrl))
+        res.setHeader('Location', encodeURI(`${imageUrl}#bh-no-compress=1`))
         return res.status(302).end()
       }
 
