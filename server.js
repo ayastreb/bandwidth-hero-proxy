@@ -72,14 +72,11 @@ app.get('/', (req, res) => {
         }
         res.setHeader('Content-Type', `image/${format}`)
         res.setHeader('Content-Length', info.size)
-
-        if (originSize > 0) {
-          res.setHeader('X-Original-Size', originSize)
-          res.setHeader('X-Bytes-Saved', originSize - info.size)
-        }
+        res.setHeader('X-Original-Size', originSize)
+        res.setHeader('X-Bytes-Saved', originSize - info.size)
       })
 
-      const getReq = Request.get(imageUrl, { headers, timeout: DEFAULT_TIMEOUT })
+      Request.get(imageUrl, { headers, timeout: DEFAULT_TIMEOUT })
         .on('error', () => res.status(400).end())
         .pipe(transformer)
         .pipe(res)
@@ -87,7 +84,7 @@ app.get('/', (req, res) => {
       res.setHeader('Location', encodeURI(imageUrl))
       res.status(302).end()
     }
-  }).on('error', () => res.status(400).end())
+  })
 })
 
 app.use(Raven.errorHandler())
