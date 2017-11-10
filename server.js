@@ -115,6 +115,5 @@ if (process.env.OPBEAT_APP_ID) app.use(opbeat.middleware.express())
 if (PORT > 0) app.listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 memwatch.on('leak', info => console.log('leak info', info))
-memwatch.on('stats', stats => console.log('stats', stats))
 
 module.exports = app
