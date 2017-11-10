@@ -8,7 +8,7 @@ if (process.env.OPBEAT_APP_ID) {
     secretToken: process.env.OPBEAT_TOKEN
   })
 }
-
+const memwatch = require('memwatch-next')
 const auth = require('basic-auth')
 const Express = require('express')
 const Raven = require('raven')
@@ -113,5 +113,8 @@ function copyHeaders(from, to) {
 app.use(Raven.errorHandler())
 if (process.env.OPBEAT_APP_ID) app.use(opbeat.middleware.express())
 if (PORT > 0) app.listen(PORT, () => console.log(`Listening on ${PORT}`))
+
+memwatch.on('leak', info => console.log('leak info', info))
+memwatch.on('stats', stats => console.log('stats', stats))
 
 module.exports = app
