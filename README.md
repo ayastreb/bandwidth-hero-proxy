@@ -1,7 +1,4 @@
 # Bandwidth Hero Data Compression Service
-<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/GNA5BNmoDRUjxvuDQsxXY3kW/ayastreb/bandwidth-hero-proxy'>
-  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/GNA5BNmoDRUjxvuDQsxXY3kW/ayastreb/bandwidth-hero-proxy.svg' />
-</a>
 
 [![NSP Status](https://nodesecurity.io/orgs/bandwidth-hero/projects/1f035cf0-00f2-43db-9bc0-8e39adb24642/badge)](https://nodesecurity.io/orgs/bandwidth-hero/projects/1f035cf0-00f2-43db-9bc0-8e39adb24642)
 
@@ -44,3 +41,7 @@ You can also use [webtask.io](https://webtask.io/) to run the service:
   ```
   wt create server.js --meta wt-compiler=webtask-tools/express
   ```
+
+<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/GNA5BNmoDRUjxvuDQsxXY3kW/ayastreb/bandwidth-hero-proxy'>
+  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/GNA5BNmoDRUjxvuDQsxXY3kW/ayastreb/bandwidth-hero-proxy.svg' />
+</a>
