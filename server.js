@@ -8,6 +8,7 @@ if (process.env.OPBEAT_APP_ID) {
     secretToken: process.env.OPBEAT_TOKEN
   })
 }
+require('newrelic')
 const memwatch = require('memwatch-next')
 const auth = require('basic-auth')
 const Express = require('express')

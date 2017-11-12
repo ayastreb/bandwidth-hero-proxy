@@ -13,6 +13,7 @@
     "basic-auth": "^2.0.0",
     "express": "4.16.2",
     "memwatch-next": "^0.3.0",
+    "newrelic": "^2.3.2",
     "opbeat": "^4.16.0",
     "raven": "^2.2.1",
     "request": "^2.83.0",
