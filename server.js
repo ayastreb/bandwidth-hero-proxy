@@ -30,6 +30,12 @@ const app = Express()
 
 app.use(Raven.requestHandler())
 app.get('/', (req, res) => {
+  req.on('error', err => {
+    console.error('req error', err)
+    res.status(400)
+    res.end()
+  })
+  res.on('error', err => console.error('res error', err))
   if (LOGIN && PASSWORD) {
     const credentials = auth(req)
     if (!credentials || credentials.name !== LOGIN || credentials.pass !== PASSWORD) {
@@ -88,14 +94,15 @@ app.get('/', (req, res) => {
             res.setHeader('Content-Length', info.size)
             res.setHeader('X-Original-Size', proxied.headers['content-length'])
             res.setHeader('X-Bytes-Saved', proxied.headers['content-length'] - info.size)
-
+            res.status(200)
             res.write(compressedImage)
-            res.status(200).end()
+            res.end()
           })
       } else {
         copyHeaders(proxied, res)
+        res.status(200)
         res.write(image)
-        res.status(200).end()
+        res.end()
       }
     }
   )
