@@ -12,6 +12,7 @@
   "dependencies": {
     "basic-auth": "^2.0.0",
     "express": "4.16.2",
+    "heapdump": "^0.3.9",
     "memwatch-next": "^0.3.0",
     "newrelic": "^2.3.2",
     "opbeat": "^4.16.0",
