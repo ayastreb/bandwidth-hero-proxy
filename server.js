@@ -29,6 +29,7 @@ Raven.config(process.env.SENTRY_DSN).install()
 const app = Express()
 
 app.use(Raven.requestHandler())
+app.enable('trust proxy')
 app.get('/', (req, res) => {
   req.on('error', err => {
     console.error('req error', err)
@@ -123,7 +124,7 @@ if (process.env.OPBEAT_APP_ID) app.use(opbeat.middleware.express())
 if (PORT > 0) app.listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 memwatch.on('leak', function() {
-  heapdump.writeSnapshot('/home/compressor/' + Date.now() + '.heapsnapshot', () => {
+  heapdump.writeSnapshot('/home/compressor/' + PORT + '_' + Date.now() + '.heapsnapshot', () => {
     console.log('heap dump created.')
   })
 })
