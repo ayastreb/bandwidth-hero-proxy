@@ -8,11 +8,8 @@ if (process.env.OPBEAT_APP_ID) {
     secretToken: process.env.OPBEAT_TOKEN
   })
 }
-const memwatch = require('memwatch-next')
-const heapdump = require('heapdump')
 const auth = require('basic-auth')
 const Express = require('express')
-const Raven = require('raven')
 const Request = require('request')
 const Sharp = require('sharp')
 
@@ -23,8 +20,6 @@ const DEFAULT_QUALITY = 40
 const DEFAULT_TIMEOUT = 10000
 const MIN_COMPRESS_LENGTH = 512
 const USER_AGENT = 'Bandwidth-Hero Compressor'
-
-Raven.config(process.env.SENTRY_DSN).install()
 
 const app = Express()
 
@@ -119,14 +114,7 @@ function copyHeaders(from, to) {
   }
 }
 
-app.use(Raven.errorHandler())
 if (process.env.OPBEAT_APP_ID) app.use(opbeat.middleware.express())
 if (PORT > 0) app.listen(PORT, () => console.log(`Listening on ${PORT}`))
-
-memwatch.on('leak', function() {
-  heapdump.writeSnapshot('/home/compressor/' + PORT + '_' + Date.now() + '.heapsnapshot', () => {
-    console.log('heap dump created.')
-  })
-})
 
 module.exports = app
