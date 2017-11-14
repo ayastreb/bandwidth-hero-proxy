@@ -23,7 +23,6 @@ const USER_AGENT = 'Bandwidth-Hero Compressor'
 
 const app = Express()
 
-app.use(Raven.requestHandler())
 app.enable('trust proxy')
 app.get('/', (req, res) => {
   req.on('error', err => {
