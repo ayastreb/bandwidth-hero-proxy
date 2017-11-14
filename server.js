@@ -17,8 +17,9 @@ const PORT = process.env.PORT
 const LOGIN = process.env.LOGIN
 const PASSWORD = process.env.PASSWORD
 const DEFAULT_QUALITY = 40
-const DEFAULT_TIMEOUT = 10000
+const DEFAULT_TIMEOUT = 5000
 const MIN_COMPRESS_LENGTH = 512
+const MIN_TRANSPARENT_COMPRESS_LENGTH = 100000
 const USER_AGENT = 'Bandwidth-Hero Compressor'
 
 const app = Express()
@@ -70,12 +71,11 @@ app.get('/', (req, res) => {
         return res.status(302).end()
       }
 
-      if (
-        proxied.headers['content-length'] > MIN_COMPRESS_LENGTH &&
-        proxied.headers['content-type'] &&
-        proxied.headers['content-type'].startsWith('image')
-      ) {
-        const format = !!req.query.jpeg ? 'jpeg' : 'webp'
+      const type = proxied.headers['content-type']
+      const length = proxied.headers['content-length']
+      const supportsWebp = !req.query.jpeg
+      if (shouldCompress(type, length, supportsWebp)) {
+        const format = supportsWebp ? 'webp' : 'jpeg'
 
         Sharp(image)
           .grayscale(req.query.bw != 0)
@@ -95,6 +95,7 @@ app.get('/', (req, res) => {
           })
       } else {
         copyHeaders(proxied, res)
+        res.setHeader('X-Proxy-Bypass', 1)
         res.status(200)
         res.write(image)
         res.end()
@@ -102,6 +103,20 @@ app.get('/', (req, res) => {
     }
   )
 })
+
+function shouldCompress(type = '', length = 0, supportsWebp) {
+  if (!type.startsWith('image')) return false
+  if (supportsWebp && length < MIN_COMPRESS_LENGTH) return false
+  if (
+    !supportsWebp &&
+    (type.endsWith('png') || type.endsWith('gif')) &&
+    length < MIN_TRANSPARENT_COMPRESS_LENGTH
+  ) {
+    return false
+  }
+
+  return true
+}
 
 function copyHeaders(from, to) {
   for (const header in from.headers) {
