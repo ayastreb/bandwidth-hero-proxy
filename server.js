@@ -87,8 +87,8 @@ app.get('/', (req, res) => {
             copyHeaders(proxied, res)
             res.setHeader('Content-Type', `image/${format}`)
             res.setHeader('Content-Length', info.size)
-            res.setHeader('X-Original-Size', proxied.headers['content-length'])
-            res.setHeader('X-Bytes-Saved', proxied.headers['content-length'] - info.size)
+            res.setHeader('X-Original-Size', length)
+            res.setHeader('X-Bytes-Saved', length - info.size)
             res.status(200)
             res.write(compressedImage)
             res.end()
@@ -106,6 +106,7 @@ app.get('/', (req, res) => {
 
 function shouldCompress(type = '', length = 0, supportsWebp) {
   if (!type.startsWith('image')) return false
+  if (length === 0) return false
   if (supportsWebp && length < MIN_COMPRESS_LENGTH) return false
   if (
     !supportsWebp &&
