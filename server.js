@@ -17,8 +17,8 @@ const PORT = process.env.PORT
 const LOGIN = process.env.LOGIN
 const PASSWORD = process.env.PASSWORD
 const DEFAULT_QUALITY = 40
-const DEFAULT_TIMEOUT = 5000
-const MIN_COMPRESS_LENGTH = 512
+const DEFAULT_TIMEOUT = 10000
+const MIN_COMPRESS_LENGTH = 10000
 const MIN_TRANSPARENT_COMPRESS_LENGTH = 100000
 const USER_AGENT = 'Bandwidth-Hero Compressor'
 
