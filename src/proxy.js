@@ -27,7 +27,9 @@ function proxy(req, res) {
       for (const [key, value] of Object.entries(origin.headers)) {
         try {
           res.setHeader(key, value)
-        } catch (e) {}
+        } catch (e) {
+          console.log(e.message)
+        }
       }
       req.params.originType = origin.headers['content-type'] || ''
       req.params.originSize = origin.headers['content-length'] || 0
