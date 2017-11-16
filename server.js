@@ -11,7 +11,7 @@ if (process.env.OPBEAT_APP_ID) {
 const auth = require('basic-auth')
 const Express = require('express')
 const Request = require('request')
-const Sharp = require('sharp')
+const sharp = require('sharp')
 
 const PORT = process.env.PORT
 const LOGIN = process.env.LOGIN
@@ -24,14 +24,9 @@ const USER_AGENT = 'Bandwidth-Hero Compressor'
 
 const app = Express()
 
+sharp.cache(false)
 app.enable('trust proxy')
 app.get('/', (req, res) => {
-  req.on('error', err => {
-    console.error('req error', err)
-    res.status(400)
-    res.end()
-  })
-  res.on('error', err => console.error('res error', err))
   if (LOGIN && PASSWORD) {
     const credentials = auth(req)
     if (!credentials || credentials.name !== LOGIN || credentials.pass !== PASSWORD) {
@@ -50,8 +45,8 @@ app.get('/', (req, res) => {
   const headers = {
     'User-Agent': USER_AGENT
   }
-  headers['X-Forwarded-For'] = req.headers['X-Forwarded-For']
-    ? `${req.ip}, ${req.headers['X-Forwarded-For']}`
+  headers['X-Forwarded-For'] = req.headers['x-forwarded-for']
+    ? `${req.ip}, ${req.headers['x-forwarded-for']}`
     : req.ip
   if (req.headers.cookie) headers['Cookie'] = req.headers.cookie
   if (req.headers.dnt) headers['DNT'] = req.headers.dnt
@@ -77,7 +72,7 @@ app.get('/', (req, res) => {
       if (shouldCompress(type, length, supportsWebp)) {
         const format = supportsWebp ? 'webp' : 'jpeg'
 
-        Sharp(image)
+        sharp(image)
           .grayscale(req.query.bw != 0)
           .toFormat(format, {
             quality: parseInt(req.query.l, 10) || DEFAULT_QUALITY
