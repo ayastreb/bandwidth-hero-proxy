@@ -1,4 +1,5 @@
 const sharp = require('sharp')
+const redirect = require('./redirect')
 
 function compress(req, res, input) {
   const format = req.params.webp ? 'webp' : 'jpeg'
@@ -7,7 +8,7 @@ function compress(req, res, input) {
     .grayscale(req.params.grayscale)
     .toFormat(format, { quality: req.params.quality })
     .toBuffer((err, output, info) => {
-      if (err || !info || res.headersSent) return res.status(400).end()
+      if (err || !info || res.headersSent) return redirect(req, res)
 
       res.setHeader('content-type', `image/${format}`)
       res.setHeader('content-length', info.size)

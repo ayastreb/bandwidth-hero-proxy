@@ -3,6 +3,7 @@ const shouldCompress = require('./shouldCompress')
 const redirect = require('./redirect')
 const compress = require('./compress')
 const bypass = require('./bypass')
+const copyHeaders = require('./copyHeaders')
 
 function proxy(req, res) {
   request.get(
@@ -19,18 +20,14 @@ function proxy(req, res) {
       timeout: 10000,
       maxRedirects: 5,
       encoding: null,
+      gzip: true,
       jar: true
     },
     (err, origin, buffer) => {
       if (err || origin.statusCode !== 200) return redirect(req, res)
 
-      for (const [key, value] of Object.entries(origin.headers)) {
-        try {
-          res.setHeader(key, value)
-        } catch (e) {
-          console.log(e.message)
-        }
-      }
+      copyHeaders(origin, res)
+      res.setHeader('content-encoding', 'identity')
       req.params.originType = origin.headers['content-type'] || ''
       req.params.originSize = origin.headers['content-length'] || 0
 
