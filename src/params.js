@@ -9,7 +9,7 @@ function params(req, res, next) {
   }
 
   req.params.url = url
-  req.params.webp = req.headers.accept && req.headers.accept.includes('image/webp')
+  req.params.webp = !req.query.jpeg
   req.params.grayscale = req.query.bw != 0
   req.params.quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
 
