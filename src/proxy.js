@@ -20,6 +20,8 @@ function proxy(req, res) {
       timeout: 10000,
       maxRedirects: 5,
       encoding: null,
+      forever: true,
+      strictSSL: false,
       gzip: true,
       jar: true
     },
