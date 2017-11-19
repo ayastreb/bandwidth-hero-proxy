@@ -1,3 +1,9 @@
+const logger = require('logzio-nodejs').createLogger({
+  token: process.env.LOGZIO_TOKEN,
+  host: 'listener.logz.io',
+  type: 'request'
+})
+
 const DEFAULT_QUALITY = 40
 
 function params(req, res, next) {
@@ -12,6 +18,12 @@ function params(req, res, next) {
   req.params.webp = !req.query.jpeg
   req.params.grayscale = req.query.bw != 0
   req.params.quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
+
+  logger.log({
+    ...req.params,
+    ip: req.ip,
+    agent: req.headers['user-agent']
+  })
 
   next()
 }
