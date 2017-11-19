@@ -20,7 +20,8 @@ function params(req, res, next) {
   req.params.quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
 
   logger.log({
-    ...req.params,
+    message: req.params.url,
+    webp: req.params.webp,
     ip: req.ip,
     agent: req.headers['user-agent']
   })
