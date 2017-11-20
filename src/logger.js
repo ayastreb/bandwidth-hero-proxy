@@ -3,10 +3,10 @@ const logger = require('logzio-nodejs').createLogger({
   host: 'listener.logz.io'
 })
 
-module.exports = (type, req) => {
+module.exports = (action, req) => {
   logger.log({
     message: req.params.url,
-    type,
+    action,
     webp: req.params.webp,
     ip: req.ip,
     origin_type: req.params.originType,
