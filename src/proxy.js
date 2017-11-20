@@ -33,7 +33,7 @@ function proxy(req, res) {
         http_error: (err && err.message) || undefined,
         http_time: `${end[0]}s ${end[1] / 1e6}ms`
       }
-      if (err || origin.statusCode !== 200) return redirect(req, res)
+      if (err || origin.statusCode >= 300) return redirect(req, res)
 
       copyHeaders(origin, res)
       res.setHeader('content-encoding', 'identity')
