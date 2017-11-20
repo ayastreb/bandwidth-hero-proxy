@@ -38,7 +38,7 @@ function proxy(req, res) {
       copyHeaders(origin, res)
       res.setHeader('content-encoding', 'identity')
       req.params.originType = origin.headers['content-type'] || ''
-      req.params.originSize = origin.headers['content-length'] || 0
+      req.params.originSize = buffer.length
 
       if (shouldCompress(req)) {
         compress(req, res, buffer)

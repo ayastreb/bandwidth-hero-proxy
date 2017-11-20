@@ -1,7 +1,9 @@
-const logger = require('logzio-nodejs').createLogger({
-  token: process.env.LOGZIO_TOKEN,
-  host: 'listener.logz.io'
-})
+const logger = process.env.LOGZIO_TOKEN
+  ? require('logzio-nodejs').createLogger({
+      token: process.env.LOGZIO_TOKEN,
+      host: 'listener.logz.io'
+    })
+  : console
 
 module.exports = (action, req) => {
   logger.log({
