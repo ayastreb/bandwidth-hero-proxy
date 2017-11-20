@@ -1,4 +1,5 @@
 const request = require('request')
+const omit = require('lodash').omit
 const shouldCompress = require('./shouldCompress')
 const redirect = require('./redirect')
 const compress = require('./compress')
@@ -11,12 +12,11 @@ function proxy(req, res) {
     req.params.url,
     {
       headers: {
+        ...omit(req.headers, ['host', 'connection']),
         'user-agent': 'Bandwidth-Hero Compressor',
         'x-forwarded-for': req.headers['x-forwarded-for']
           ? `${req.ip}, ${req.headers['x-forwarded-for']}`
-          : req.ip,
-        cookie: req.headers.cookie,
-        dnt: req.headers.dnt
+          : req.ip
       },
       timeout: 10000,
       maxRedirects: 5,
@@ -33,7 +33,7 @@ function proxy(req, res) {
         http_error: (err && err.message) || undefined,
         http_time: `${end[0]}s ${end[1] / 1e6}ms`
       }
-      if (err || origin.statusCode >= 300) return redirect(req, res)
+      if (err || origin.statusCode >= 400) return redirect(req, res)
 
       copyHeaders(origin, res)
       res.setHeader('content-encoding', 'identity')
