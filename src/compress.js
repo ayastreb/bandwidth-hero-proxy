@@ -12,8 +12,8 @@ function compress(req, res, input) {
     .toBuffer((err, output, info) => {
       const end = process.hrtime(start)
       req.log['compress_time'] = `${end[0]}s ${end[1] / 1e6}ms`
-      req.log['compress_size'] = (info && info.size) || ''
-      req.log['compress_error'] = (err && err.message) || ''
+      req.log['compress_size'] = (info && info.size) || undefined
+      req.log['compress_error'] = (err && err.message) || undefined
       logger('compress', req)
 
       if (err || !info || res.headersSent) return redirect(req, res)
