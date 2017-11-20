@@ -1,5 +1,5 @@
 const request = require('request')
-const omit = require('lodash').omit
+const pick = require('lodash').pick
 const shouldCompress = require('./shouldCompress')
 const redirect = require('./redirect')
 const compress = require('./compress')
@@ -12,7 +12,7 @@ function proxy(req, res) {
     req.params.url,
     {
       headers: {
-        ...omit(req.headers, ['host', 'connection']),
+        ...pick(req.headers, ['cookie', 'dnt']),
         'user-agent': 'Bandwidth-Hero Compressor',
         'x-forwarded-for': req.headers['x-forwarded-for']
           ? `${req.ip}, ${req.headers['x-forwarded-for']}`
@@ -31,7 +31,7 @@ function proxy(req, res) {
       const statusCode = (origin && origin.statusCode) || undefined
       req.log = {
         http_status: statusCode,
-        http_error: (err && err.message) || (statusCode === 400 && buffer.toString()) || undefined,
+        http_error: (err && err.message) || (statusCode >= 400 && buffer.toString()) || undefined,
         http_time: (end[0] * 1e6 + end[1]) / 1e6
       }
       if (err || statusCode >= 400) return redirect(req, res)
