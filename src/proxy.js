@@ -31,7 +31,7 @@ function proxy(req, res) {
       const statusCode = (origin && origin.statusCode) || undefined
       req.log = {
         http_status: statusCode,
-        http_error: (err && err.message) || (statusCode >= 400 && buffer.toString()) || undefined,
+        http_error: (err && err.message) || undefined,
         http_time: (end[0] * 1e6 + end[1]) / 1e6
       }
       if (err || statusCode >= 400) return redirect(req, res)
