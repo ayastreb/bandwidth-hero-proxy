@@ -7,6 +7,7 @@ function params(req, res, next) {
     res.setHeader('Location', 'https://bandwidth-hero.com')
     return res.status(302).end()
   }
+  url = url.replace(/http:\/\/1\.1\.\d\.\d\/bmi\/(https?:\/\/)?/i, 'http://')
 
   req.params.url = url
   req.params.webp = !req.query.jpeg
