@@ -11,7 +11,7 @@ function compress(req, res, input) {
     .toFormat(format, { quality: req.params.quality })
     .toBuffer((err, output, info) => {
       const end = process.hrtime(start)
-      req.log['compress_time'] = `${end[0]}s ${end[1] / 1e6}ms`
+      req.log['compress_time'] = (end[0] * 1e6 + end[1]) / 1e6
       req.log['compress_size'] = (info && info.size) || undefined
       req.log['compress_error'] = (err && err.message) || undefined
       logger('compress', req)
