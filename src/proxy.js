@@ -28,12 +28,13 @@ function proxy(req, res) {
     },
     (err, origin, buffer) => {
       const end = process.hrtime(start)
+      const statusCode = (origin && origin.statusCode) || undefined
       req.log = {
-        http_status: (origin && origin.statusCode) || undefined,
-        http_error: (err && err.message) || undefined,
+        http_status: statusCode,
+        http_error: (err && err.message) || (statusCode === 400 && buffer.toString()) || undefined,
         http_time: (end[0] * 1e6 + end[1]) / 1e6
       }
-      if (err || origin.statusCode >= 400) return redirect(req, res)
+      if (err || statusCode >= 400) return redirect(req, res)
 
       copyHeaders(origin, res)
       res.setHeader('content-encoding', 'identity')
