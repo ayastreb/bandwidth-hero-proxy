@@ -29,7 +29,7 @@ function proxy(req, res) {
     (err, origin, buffer) => {
       const end = process.hrtime(start)
       req.log = {
-        http_status: origin.statusCode,
+        http_status: (origin && origin.statusCode) || '',
         http_error: (err && err.message) || '',
         http_time: `${end[0]}s ${end[1] / 1e6}ms`
       }
