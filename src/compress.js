@@ -8,7 +8,11 @@ function compress(req, res, input) {
 
   sharp(input)
     .grayscale(req.params.grayscale)
-    .toFormat(format, { quality: req.params.quality })
+    .toFormat(format, {
+      quality: req.params.quality,
+      progressive: true,
+      optimizeScans: true
+    })
     .toBuffer((err, output, info) => {
       const end = process.hrtime(start)
       req.log['compress_time'] = (end[0] * 1e6 + end[1]) / 1e6
