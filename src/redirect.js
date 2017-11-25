@@ -9,7 +9,7 @@ function redirect(req, res) {
   res.removeHeader('expires')
   res.removeHeader('date')
   res.removeHeader('etag')
-  res.setHeader('location', encodeURI(`${req.params.url}#bh-no-compress=1`))
+  res.setHeader('location', encodeURI(req.params.url))
   res.status(302).end()
 }
 
