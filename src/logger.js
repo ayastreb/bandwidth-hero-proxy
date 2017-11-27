@@ -13,7 +13,6 @@ module.exports = (action, req) => {
     ip: req.ip,
     origin_type: req.params.originType,
     origin_size: req.params.originSize,
-    agent: req.headers['user-agent'],
     ...req.log
   })
 }
