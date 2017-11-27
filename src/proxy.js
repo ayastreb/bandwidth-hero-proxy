@@ -21,9 +21,7 @@ function proxy(req, res) {
       'cf-connecting-ip'
     ]),
     'user-agent': 'Bandwidth-Hero Compressor',
-    'x-forwarded-for': req.headers['x-forwarded-for']
-      ? `${req.ip}, ${req.headers['x-forwarded-for']}`
-      : req.ip,
+    'x-forwarded-for': req.headers['x-forwarded-for'] || req.ip,
     'x-forwarded-proto': req.params.proto,
     'x-forwarded-host': req.params.host,
     'x-forwarded-port': req.params.port,
