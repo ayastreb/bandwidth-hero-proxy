@@ -7,7 +7,6 @@ const bypass = require('./bypass')
 const copyHeaders = require('./copyHeaders')
 
 function proxy(req, res) {
-  const start = process.hrtime()
   request.get(
     req.params.url,
     {
@@ -25,14 +24,7 @@ function proxy(req, res) {
       jar: true
     },
     (err, origin, buffer) => {
-      const end = process.hrtime(start)
-      const statusCode = (origin && origin.statusCode) || undefined
-      req.log = {
-        http_status: statusCode,
-        http_error: (err && err.message) || undefined,
-        http_time: (end[0] * 1e9 + end[1]) / 1e6
-      }
-      if (err || statusCode >= 400) return redirect(req, res)
+      if (err || origin.statusCode >= 400) return redirect(req, res)
 
       copyHeaders(origin, res)
       res.setHeader('content-encoding', 'identity')
