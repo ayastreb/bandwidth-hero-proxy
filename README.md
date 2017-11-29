@@ -21,26 +21,13 @@ You can deploy this service to Heroku:
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ayastreb/bandwidth-hero-proxy)
 
-### Webtask
+### Self-hosted
 
-You can also use [webtask.io](https://webtask.io/) to run the service:
+Data compression service is a Node.js app which you can run on any server that supports Node.js.
+Check out
+[this guide](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-16-04)
+on how to setup Node.js on Ubuntu.
 
-* Clone the repository:
-
-  ```
-  git clone https://github.com/ayastreb/bandwidth-hero-proxy.git
-  ```
-
-* Install [Webtask CLI](https://webtask.io/cli):
-
-  ```
-  npm install wt-cli -g
-
-  wt init __your_email__
-  ```
-
-* Create new webtask:
-
-  ```
-  wt create server.js --meta wt-compiler=webtask-tools/express
-  ```
+DigitalOcean also provides an
+[easy way](https://www.digitalocean.com/products/one-click-apps/node-js/) to setup a server ready to
+host Node.js apps.
