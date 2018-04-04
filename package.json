@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "basic-auth": "^2.0.0",
-    "express": "4.16.2",
-    "lodash": "^4.17.4",
-    "request": "^2.83.0",
+    "express": "4.16.3",
+    "lodash": "^4.17.5",
+    "request": "^2.85.0",
     "sharp": "^0.20.1"
   },
   "engines": {
