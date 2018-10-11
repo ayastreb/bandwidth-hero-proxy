@@ -12,7 +12,7 @@ function compress(req, res, input) {
     .toBuffer((err, output, info) => {
       if (err || !info || res.headersSent) return redirect(req, res)
 
-      res.setHeader('content-type', `image/${format}`)
+      res.setHeader('content-type', `image/webp`)
       res.setHeader('content-length', info.size)
       res.setHeader('x-original-size', req.params.originSize)
       res.setHeader('x-bytes-saved', req.params.originSize - info.size)
