@@ -2,11 +2,10 @@ const sharp = require('sharp')
 const redirect = require('./redirect')
 
 function compress(req, res, input) {
-  const format = req.params.webp ? 'webp' : 'jpeg'
 
   sharp(input)
     .grayscale(req.params.grayscale)
-    .toFormat(format, {
+    .toFormat('webp', {
       quality: req.params.quality,
       progressive: true,
       optimizeScans: true
