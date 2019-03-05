@@ -31,7 +31,7 @@ function proxy(req, res) {
       req.params.originType = origin.headers['content-type'] || ''
       req.params.originSize = buffer.length
 
-      if (shouldCompress(req)) {
+      if (shouldCompress(req, buffer)) {
         compress(req, res, buffer)
       } else {
         bypass(req, res, buffer)
