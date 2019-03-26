@@ -12,7 +12,7 @@ function compress(req, res, input) {
   const originType = req.params.originType
   
   if(!req.params.grayscale && format === 'webp' && originType.endsWith('gif') && isAnimated(input)){
-    let {hostname, pathname} = (new URL(req.params.url))
+    let {hostname, pathname} = new URL(req.params.url)
     
     let path = `${os.tmpdir()}/${hostname + encodeURIComponent(pathname)}`;
     fs.writeFile(path + '.gif', input, (err) => {
@@ -81,6 +81,8 @@ function compress(req, res, input) {
     function setResponseHeaders (info, imgFormat){
         res.setHeader('content-type', `image/${imgFormat}`)
         res.setHeader('content-length', info.size)
+        let filename = (new URL(req.params.url).pathname.split('/').pop() || "image") + '.' + format
+        res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"' )
         res.setHeader('x-original-size', req.params.originSize)
         res.setHeader('x-bytes-saved', req.params.originSize - info.size)
         res.status(200)
