@@ -60,6 +60,7 @@ function compress(req, res, input) {
             }else if(pixelCount > 500000 && metadata.size > 256000){
                 compressionQuality *= 0.75
             }
+            compressionQuality = Math.ceil(compressionQuality)
             
             sharp(input)
             .grayscale(req.params.grayscale)
