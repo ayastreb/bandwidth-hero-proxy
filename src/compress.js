@@ -18,7 +18,7 @@ function compress(req, res, input) {
     fs.writeFile(path + '.gif', input, (err) => {
         console.error(err)
         if (err) return redirect(req, res)
-        //defer to gif2webp *high latency*
+        //defer to gif2webp *higher latency*
         execFile(gif2webp, ['-lossy', '-m', 2, '-q', req.params.quality , '-mt', 
             `${path}.gif`,
             '-o', 
@@ -31,12 +31,13 @@ function compress(req, res, input) {
 
                     setResponseHeaders(fs.statSync(`${path}.webp`), 'webp')
                     
+                    //Write to stream
+                    res.write(data)
+                    
                     //initiate cleanup procedures
                     fs.unlink(`${path}.gif`, function(){})
                     fs.unlink(`${path}.webp`, function(){})
                     
-                    //Write to stream
-                    res.write(data)
                     res.end()
                 })
         })
@@ -51,12 +52,16 @@ function compress(req, res, input) {
             let pixelCount = metadata.width * metadata.height;
             var compressionQuality = req.params.quality;
             
+            //3MP or 1.5MB
             if(pixelCount > 3000000 || metadata.size > 1536000){
                 compressionQuality *= 0.1
+            //2MP or 1MB
             }else if(pixelCount > 2000000 && metadata.size > 1024000){
                 compressionQuality *= 0.25
+            //1MP or 512KB
             }else if(pixelCount > 1000000 && metadata.size > 512000){
                 compressionQuality *= 0.5
+            //0.5MP or 256KB
             }else if(pixelCount > 500000 && metadata.size > 256000){
                 compressionQuality *= 0.75
             }

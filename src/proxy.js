@@ -3,6 +3,7 @@ const pick = require('lodash').pick
 const shouldCompress = require('./shouldCompress')
 const redirect = require('./redirect')
 const compress = require('./compress')
+const reEncode = require('./reEncode')
 const bypass = require('./bypass')
 const copyHeaders = require('./copyHeaders')
 
@@ -28,12 +29,15 @@ function proxy(req, res) {
 
       copyHeaders(origin, res)
       res.setHeader('content-encoding', 'identity')
-      req.params.originType = origin.headers['content-type'] || ''
+      let originType = origin.headers['content-type'] || ''
+      req.params.originType = originType
       req.params.originSize = buffer.length
 
       if (shouldCompress(req, buffer)) {
         compress(req, res, buffer)
-      } else {
+      } else if (originType.startsWith('video') || originType.startsWith('audio')){
+        reEncode(req, res, buffer)
+      }else {
         bypass(req, res, buffer)
       }
     }
