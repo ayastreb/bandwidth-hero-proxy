@@ -52,7 +52,10 @@ function reEncode(req, res, input) {
             ffmpeg(req.params.url)
                 .audioCodec("opus")
                 .format("webm")
-                .audioBitrate(quality * 2)
+                .audioBitrate(aBitrateTarget)
+                .on('stderr', function(stderrLine) {
+                    console.log('Stderr output: ' + stderrLine);
+                })
                 .pipe(res, { end: true })
         }else{
             ffmpeg(req.params.url)
