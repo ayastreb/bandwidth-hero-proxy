@@ -63,7 +63,7 @@ function reEncode(req, res, input) {
                 .audioBitrate(aBitrateTarget)
                 .size(
                     //480p cap
-                    '?x' + Math.min(480, videoStreamInfo ? videoStreamInfo.height : 0)
+                    '?x' + Math.min(360, videoStreamInfo ? videoStreamInfo.height : 0)
                 )
                 //.format(format.format_name.split(',')[0])
                 .format('webm')
