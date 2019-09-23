@@ -18,7 +18,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "gif2webp-bin": "^2.0.0",
     "is-animated": "^1.1.1",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.15",
     "request": "^2.88.0",
     "sharp": "^0.23.0"
   },
