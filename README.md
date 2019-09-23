@@ -21,6 +21,9 @@ You can deploy this service to Heroku:
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ayastreb/bandwidth-hero-proxy)
 
+ENVIRONMENT_VARIABLES
+`MIN_COMPRESS_LENGTH=2048` (minimum byte length for an image to be compressible; default 2048 ~2kB)
+
 [![Deploy to Heroku guide](http://img.youtube.com/vi/y3tkYEXAics/0.jpg)](http://www.youtube.com/watch?v=y3tkYEXAics)
 
 ### Self-hosted
