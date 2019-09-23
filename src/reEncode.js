@@ -38,8 +38,8 @@ function reEncode(req, res, input) {
             }
             audioOnly = !videoStreamInfo;
             
-            if((!audioStreamInfo && !videoStreamInfo) || (audioStreamInfo && audioStreamInfo.bit_rate <= aBitrateTarget * 1000 && audioOnly) || videoStreamInfo && (
-                videoStreamInfo.bit_rate <= vBitrateTarget * 1000 || videoStreamInfo.duration > 240)){
+            if((!audioStreamInfo && !videoStreamInfo) || (audioStreamInfo && audioStreamInfo.bit_rate <= aBitrateTarget * 800 && audioOnly) || videoStreamInfo && (
+                videoStreamInfo.bit_rate <= vBitrateTarget * 800 || videoStreamInfo.duration > 90)){
                 return redirect(req, res)
             }
         }
@@ -67,7 +67,7 @@ function reEncode(req, res, input) {
                 )
                 //.format(format.format_name.split(',')[0])
                 .format('webm')
-                .outputOptions(["-deadline realtime","-cpu-used 7"])
+                .outputOptions(["-deadline realtime","-cpu-used 8"])
                 //.outputOptions("-movflags +frag_keyframe")
                 .on('error', function(err) {
                     console.log('An error occurred: ' + err.message)
