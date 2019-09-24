@@ -39,7 +39,7 @@ function reEncode(req, res, input) {
             audioOnly = !videoStreamInfo;
             
             if((!audioStreamInfo && !videoStreamInfo) || (audioStreamInfo && audioStreamInfo.bit_rate <= aBitrateTarget * 800 && audioOnly) || videoStreamInfo && (
-                videoStreamInfo.bit_rate <= vBitrateTarget * 800 || videoStreamInfo.duration > 30)){
+                videoStreamInfo.bit_rate <= vBitrateTarget * 800 || videoStreamInfo.duration > 600)){
                 return redirect(req, res)
             }
         }
