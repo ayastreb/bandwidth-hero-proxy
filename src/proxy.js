@@ -8,6 +8,7 @@ const bypass = require('./bypass')
 const copyHeaders = require('./copyHeaders')
 
 function proxy(req, res) {
+    var isMediaStream
   request.get(
     req.params.url,
     {
@@ -27,21 +28,33 @@ function proxy(req, res) {
     (err, origin, buffer) => {
       if (err || origin.statusCode >= 400) return redirect(req, res)
 
-      copyHeaders(origin, res)
-      res.setHeader('content-encoding', 'identity')
-      let originType = origin.headers['content-type'] || ''
-      req.params.originType = originType
-      req.params.originSize = buffer.length
+      if(!isMediaStream){
+        copyHeaders(origin, res)
+        res.setHeader('content-encoding', 'identity')
+        let originType = origin.headers['content-type'] || ''
+        req.params.originType = originType
+        req.params.originSize = buffer.length
 
-      if (shouldCompress(req, buffer)) {
-        compress(req, res, buffer)
-      } else if (originType.startsWith('video') || originType.startsWith('audio')){
-        reEncode(req, res, buffer)
-      }else {
-        bypass(req, res, buffer)
+        if (shouldCompress(req, buffer)) {
+            isMediaStream = false
+            compress(req, res, buffer)
+        } else if (originType.startsWith('video') || originType.startsWith('audio')){
+        //  reEncode(req, res, buffer)
+        } else {
+            bypass(req, res, buffer)
+        }
       }
     }
-  )
+  ).on('response', function(response) {
+    let originType = response.headers['content-type'] || ''
+    if (originType.startsWith('video') || originType.startsWith('audio')){
+        isMediaStream = true
+        reEncode(req, res)
+      }
+  }).on('error', function(err) {
+    console.error(err)
+    return redirect(req, res)
+  })
 }
 
 module.exports = proxy

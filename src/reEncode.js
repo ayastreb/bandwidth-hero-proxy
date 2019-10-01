@@ -10,14 +10,16 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 ffmpeg.setFfprobePath(ffprobePath);
 
 function reEncode(req, res, input) {
-    var quality = req.params.quality;
-    var vBitrateTarget = quality * 10; //200 - 800
-    var aBitrateTarget = quality * 2;
+    var quality = req.params.quality
+    var vBitrateTarget = quality * 10 //200 - 800
+    var aBitrateTarget = quality * 2
+    var timeoutSeconds = 7200 //2 hours
     
     ffmpeg.ffprobe(req.params.url, function(err, metadata) {
         let audioStreamInfo, videoStreamInfo, audioOnly
         //format = metadata.format
         if(err || !metadata){
+            console.error(err)
             return redirect(req, res)
         }
         if(metadata){
@@ -49,16 +51,26 @@ function reEncode(req, res, input) {
         //let path = `${os.tmpdir()}/${hostname + encodeURIComponent(pathname)}.webm`;
         
         if(audioOnly){
-            ffmpeg(req.params.url)
+            ffmpeg({
+                source: req.params.url,
+                timeout: timeoutSeconds
+            })
                 .audioCodec("opus")
                 .format("webm")
                 .audioBitrate(aBitrateTarget)
+                .on('error', function(err) {
+                    console.error('An error occurred: ' + err.message)
+                    return redirect(req, res)
+                })
                 .on('stderr', function(stderrLine) {
                     console.log('Stderr output: ' + stderrLine);
                 })
                 .pipe(res, { end: true })
         }else{
-            ffmpeg(req.params.url)
+            ffmpeg({
+                source: req.params.url,
+                timeout: timeoutSeconds
+            })
                 .videoCodec("libvpx-vp9")//videoStreamInfo.codec_name)
                 .videoBitrate(vBitrateTarget)
                 .audioCodec("opus")//audioStreamInfo.codec_name)
@@ -73,12 +85,11 @@ function reEncode(req, res, input) {
                 .outputOptions(["-deadline realtime","-cpu-used 7"])
                 //.outputOptions("-movflags +frag_keyframe")
                 .on('error', function(err) {
-                    console.log('An error occurred: ' + err.message)
-                    console.error(err);
+                    console.error('An error occurred: ' + err.message)
                     return redirect(req, res)
                 })
                 .on('stderr', function(stderrLine) {
-                    console.log('Stderr output: ' + stderrLine);
+                    console.log('Stderr output: ' + stderrLine)
                 })
                 .on('end', function() {
                 console.log('Processing finished !')
