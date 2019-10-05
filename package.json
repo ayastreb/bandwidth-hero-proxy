@@ -11,11 +11,16 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "@ffprobe-installer/ffprobe": "^1.0.12",
     "basic-auth": "^2.0.0",
     "express": "4.16.2",
-    "lodash": "^4.17.4",
-    "request": "^2.83.0",
-    "sharp": "^0.18.4"
+    "fluent-ffmpeg": "^2.1.2",
+    "gif2webp-bin": "^2.0.0",
+    "is-animated": "^1.1.1",
+    "lodash": "^4.17.15",
+    "request": "^2.88.0",
+    "sharp": "^0.23.0"
   },
   "engines": {
     "node": "^8.6.0"
