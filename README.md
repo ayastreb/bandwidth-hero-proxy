@@ -22,7 +22,7 @@ and user's IP address through to the origin host.
 `AUDIO_QUALITY_MULTIPLIER` Default=2 (The Integer to multiply the 20-80 Quality value (l param) by to get the target video bitrate in kbps. For example, if multiplier is set to 2. Low(20) sets a target bitrate of 40kbps)<br/>
 `MEDIA_TIMEOUT` Default=7200 (Set the timeout in seconds for outputted Audio and Video streams)<br/>
 `VIDEO_HEIGHT_THRES` Default=360 (Set the maximum video height threshold in Pixels. 480 becomes 480p, etc)<br/>
-`VIDEO_WEBM_CPU_USED` Default=7 (Read more about this [here](https://trac.ffmpeg.org/wiki/Encode/VP9#CPUUtilizationSpeed))
+`VIDEO_WEBM_CPU_USED` Default=7 (sets -cpu-used flag in the libvpx-vp9 video encoder. Current valid values at time of writing are (-8 thru 8) Read more about this [here](https://trac.ffmpeg.org/wiki/Encode/VP9#CPUUtilizationSpeed))
 
 ### Heroku
 
