@@ -22,7 +22,13 @@ You can deploy this service to Heroku:
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ayastreb/bandwidth-hero-proxy)
 
 ENVIRONMENT_VARIABLES
-`MIN_COMPRESS_LENGTH=2048` (minimum byte length for an image to be compressible; default 2048 ~2kB)
+`MIN_COMPRESS_LENGTH=2048` Default=2048 (minimum byte length for an image to be compressible; default 2048 ~2kB)
+`DISABLE_ANIMATED=1` (Disable small apng passthrough and animated GIF to animated webp conversion (uses temp dir; Can also be "true")
+`VIDEO_QUALITY_MULTIPLIER` Default=10 (The Integer to multiply the 20-80 Quality value (l param) by to get the target video bitrate in kbps. For example, if multiplier is set to 10. Low(20) sets a target bitrate of 200kbps)
+`AUDIO_QUALITY_MULTIPLIER` Default=2 (The Integer to multiply the 20-80 Quality value (l param) by to get the target video bitrate in kbps. For example, if multiplier is set to 2. Low(20) sets a target bitrate of 40kbps)
+`MEDIA_TIMEOUT` Default=7200 (Set the timeout in seconds for outputted Audio and Video streams)
+`VIDEO_HEIGHT_THRES` Default=360 (Set the maximum video height threshold in Pixels. 480 becomes 480p, etc)
+`VIDEO_WEBM_CPU_USED` Default=7 (Read more about this [here](https://trac.ffmpeg.org/wiki/Encode/VP9#CPUUtilizationSpeed))
 
 [![Deploy to Heroku guide](http://img.youtube.com/vi/y3tkYEXAics/0.jpg)](http://www.youtube.com/watch?v=y3tkYEXAics)
 

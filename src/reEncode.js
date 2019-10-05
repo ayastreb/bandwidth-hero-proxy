@@ -9,11 +9,17 @@ const {URL} = require('url')
 ffmpeg.setFfmpegPath(ffmpegPath);
 ffmpeg.setFfprobePath(ffprobePath);
 
+const VIDEO_QUALITY_MULTIPLIER = parseInt(process.env.VIDEO_QUALITY_MULTIPLIER) || 10
+const AUDIO_QUALITY_MULTIPLIER = parseInt(process.env.AUDIO_QUALITY_MULTIPLIER) || 2
+const MEDIA_TIMEOUT = parseInt(process.env.MEDIA_TIMEOUT) || 7200
+const VIDEO_HEIGHT_THRESH = parseInt(process.env.VIDEO_HEIGHT_THRESH) || 360
+const VIDEO_WEBM_CPU_USED = parseInt(process.env.VIDEO_WEBM_CPU_USED) || 7
+
 function reEncode(req, res, input) {
     var quality = req.params.quality
-    var vBitrateTarget = quality * 10 //200 - 800
-    var aBitrateTarget = quality * 2
-    var timeoutSeconds = 7200 //2 hours
+    var vBitrateTarget = quality * VIDEO_QUALITY_MULTIPLIER //200 - 800
+    var aBitrateTarget = quality * AUDIO_QUALITY_MULTIPLIER
+    var timeoutSeconds = MEDIA_TIMEOUT //2 hours
     
     ffmpeg.ffprobe(req.params.url, function(err, metadata) {
         let audioStreamInfo, videoStreamInfo, audioOnly
@@ -77,12 +83,11 @@ function reEncode(req, res, input) {
                 //.audioQuality(Math.ceil(quality / 20)) //1-4
                 .audioBitrate(aBitrateTarget)
                 .size(
-                    //480p cap
-                    '?x' + Math.min(360, videoStreamInfo ? videoStreamInfo.height : 0)
+                    '?x' + Math.min(VIDEO_HEIGHT_THRESH, videoStreamInfo ? videoStreamInfo.height : 0)
                 )
                 //.format(format.format_name.split(',')[0])
                 .format('webm')
-                .outputOptions(["-deadline realtime","-cpu-used 7"])
+                .outputOptions(["-deadline realtime",`-cpu-used ${VIDEO_WEBM_CPU_USED}`])
                 //.outputOptions("-movflags +frag_keyframe")
                 .on('error', function(err) {
                     console.error('An error occurred: ' + err.message)

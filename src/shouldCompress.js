@@ -18,7 +18,7 @@ function shouldCompress(req, buffer) {
     return false
   }
   
-  if((originType.endsWith('png')) && isAnimated(buffer) && originSize < APNG_THRESH_LENGTH){
+  if(!process.env.DISABLE_ANIMATED && (originType.endsWith('png')) && isAnimated(buffer) && originSize < APNG_THRESH_LENGTH){
       //It's an animated png file, let it pass through through if small enough
       return false
   }
