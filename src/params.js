@@ -1,16 +1,28 @@
 const DEFAULT_QUALITY = 40
 
 function params(req, res, next) {
-  let url = req.query.url
-  if (Array.isArray(url)) url = url.join('&url=')
-  if (!url) return res.end('bandwidth-hero-proxy')
+  if (req._parsedUrl.pathname == "/") {
+    // old URL format /?url=https%3A%2F%2Fhost%2Fpath%2Ffile.jpg&jpeg=0&bw=0&l=50
+    let url = req.query.url
+    if (Array.isArray(url)) url = url.join('&url=')
+    if (!url) return res.end('bandwidth-hero-proxy')
 
-  url = url.replace(/http:\/\/1\.1\.\d\.\d\/bmi\/(https?:\/\/)?/i, 'http://')
-  req.params.url = url
-  req.params.webp = !req.query.jpeg
-  req.params.grayscale = req.query.bw != 0
-  req.params.quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
-
+    url = url.replace(/http:\/\/1\.1\.\d\.\d\/bmi\/(https?:\/\/)?/i, 'http://')
+    req.params.url = url
+    req.params.webp = !req.query.jpeg
+    req.params.grayscale = req.query.bw != 0
+    req.params.quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
+  }
+  else {
+    // new URL format /https/host/path/file.jpg.c50.webp
+    let match = req.url.match(/^\/(\w+)\/(.*?).([bc])(\d{1,3})\.(\w+)$/)
+    if (match) {
+      req.params.url = match[1] + "://" + match[2];
+      req.params.grayscale = (match[3] == "b");
+      req.params.quality = parseInt(match[4], 10) || DEFAULT_QUALITY;
+      req.params.webp = (match[5] == "webp");
+    }
+  }
   next()
 }
 
