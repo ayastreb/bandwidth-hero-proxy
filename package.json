@@ -14,7 +14,7 @@
     "express": "4.17.1",
     "lodash": "^4.17.21",
     "request": "^2.83.0",
-    "sharp": "^0.28.2"
+    "sharp": "^0.30.5"
   },
   "engines": {
     "node": "14.x"
