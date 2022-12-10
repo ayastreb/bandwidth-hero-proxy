@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "basic-auth": "^2.0.1",
-    "express": "4.17.1",
+    "express": "4.17.3",
     "lodash": "^4.17.21",
     "request": "^2.83.0",
     "sharp": "^0.28.2"
